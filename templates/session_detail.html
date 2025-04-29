@@ -1,82 +1,229 @@
-{% extends "base.html" %}
-
-{% block title %}세션 상세 정보{% endblock %}
-
-{% block content %}
-<div class="row">
-    <div class="col-12">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/history">운동 기록</a></li>
-                <li class="breadcrumb-item active" aria-current="page">세션 상세</li>
-            </ol>
-        </nav>
-        
-        <h2 class="mb-4">
-            {{ session.routine_type|capitalize }} 루틴
-            <small class="text-muted">{{ session.date.strftime('%Y년 %m월 %d일 %H:%M') if session.date is not string else session.date }}</small>
-        </h2>
-    </div>
+{% extends "base.html" %} {% block title %}세션 상세 정보{% endblock %} {% block
+header_title %}{{ session.routine_type|capitalize }} 루틴{% endblock %} {% block
+header_subtitle %}{{ session.date.strftime('%Y년 %m월 %d일') if session.date is
+not string else session.date }}{% endblock %} {% block content %}
+<!-- 뒤로가기 버튼 -->
+<div class="mb-3">
+  <a href="/history" class="btn btn-outline-primary btn-sm rounded-pill">
+    <i class="fas fa-arrow-left me-1"></i> 기록으로 돌아가기
+  </a>
 </div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h4>수행한 운동 목록</h4>
-            </div>
-            <div class="card-body">
-                {% if exercises|length == 0 %}
-                <p class="text-center text-muted">이 세션에 기록된 운동이 없습니다.</p>
-                {% else %}
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>운동 종목</th>
-                                <th>무게</th>
-                                <th>세트 수행</th>
-                                <th>성공/실패</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for name, exercise in exercises.items() %}
-                            <tr>
-                                <td>
-                                    <strong>{{ name }}</strong>
-                                </td>
-                                <td>{{ exercise.weight }}kg</td>
-                                <td>
-                                    {% for set in exercise.sets %}
-                                    {% if set.status == 'success' %}
-                                    <span class="badge bg-success" title="성공">{{ set.set_number }}</span>
-                                    {% elif set.status == 'fail' %}
-                                    <span class="badge bg-danger" title="실패">{{ set.set_number }}</span>
-                                    {% endif %}
-                                    {% endfor %}
-                                </td>
-                                <td>
-                                    <span class="text-success">성공: {{ exercise.success_count }}회</span><br>
-                                    <span class="text-danger">실패: {{ exercise.fail_count }}회</span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% endif %}
-            </div>
+<!-- 세션 요약 카드 -->
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="row align-items-center">
+      <div class="col-auto">
+        {% if session.routine_type == 'push' %}
+        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3">
+          <i class="fas fa-hand-back-fist fa-2x"></i>
         </div>
+        {% elif session.routine_type == 'pull' %}
+        <div class="bg-success bg-opacity-10 text-success rounded-circle p-3">
+          <i class="fas fa-hands-pulling fa-2x"></i>
+        </div>
+        {% elif session.routine_type == 'leg' %}
+        <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3">
+          <i class="fas fa-person-walking fa-2x"></i>
+        </div>
+        {% else %}
+        <div
+          class="bg-secondary bg-opacity-10 text-secondary rounded-circle p-3"
+        >
+          <i class="fas fa-dumbbell fa-2x"></i>
+        </div>
+        {% endif %}
+      </div>
+      <div class="col">
+        <h4 class="fw-bold mb-0">{{ session.routine_type|capitalize }} 루틴</h4>
+        <p class="text-muted mb-0">
+          {{ session.date.strftime('%Y년 %m월 %d일 %H:%M') if session.date is
+          not string else session.date }}
+        </p>
+
+        <!-- 요약 정보 -->
+        <div class="d-flex mt-2">
+          <div class="me-3">
+            <span class="badge bg-primary rounded-pill px-2 py-1">
+              <i class="fas fa-dumbbell me-1"></i> {{ exercises|length }}종목
+            </span>
+          </div>
+          <div class="me-3">
+            <span class="badge bg-success rounded-pill px-2 py-1">
+              <i class="fas fa-check me-1"></i>
+              {% set success_count = namespace(total=0) %} {% for name, exercise
+              in exercises.items() %} {% set success_count.total =
+              success_count.total + exercise.success_count %} {% endfor %} {{
+              success_count.total }}세트 성공
+            </span>
+          </div>
+          <div>
+            <span class="badge bg-danger rounded-pill px-2 py-1">
+              <i class="fas fa-times me-1"></i>
+              {% set fail_count = namespace(total=0) %} {% for name, exercise in
+              exercises.items() %} {% set fail_count.total = fail_count.total +
+              exercise.fail_count %} {% endfor %} {{ fail_count.total }}세트
+              실패
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-end">
-            <a href="/progress-graph" class="btn btn-primary">
-                <i class="fas fa-chart-line me-2"></i>진행 추이 보기
-            </a>
-        </div>
-    </div>
+<!-- 운동 목록 -->
+{% if exercises|length == 0 %}
+<div class="card">
+  <div class="card-body text-center p-5">
+    <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+    <h5>이 세션에 기록된 운동이 없습니다</h5>
+    <p class="text-muted mb-0">다른 세션을 확인해보세요</p>
+  </div>
 </div>
+{% else %}
+<div class="mb-4">
+  <h5 class="fw-bold mb-3">
+    <i class="fas fa-list-check me-2 text-primary"></i>수행한 운동
+  </h5>
+
+  {% for name, exercise in exercises.items() %}
+  <div class="card mb-3 exercise-detail-card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <h5 class="fw-bold mb-0">{{ name }}</h5>
+        <span class="badge bg-primary rounded-pill"
+          >{{ exercise.weight }}kg</span
+        >
+      </div>
+
+      <!-- 세트 정보 -->
+      <div class="mt-3">
+        <p class="text-muted small mb-2">세트 수행</p>
+        <div class="sets-display">
+          {% for set in exercise.sets %} {% if set.status == 'success' %}
+          <span class="set-circle success" title="성공"
+            >{{ set.set_number }}</span
+          >
+          {% elif set.status == 'fail' %}
+          <span class="set-circle fail" title="실패">{{ set.set_number }}</span>
+          {% endif %} {% endfor %}
+        </div>
+      </div>
+
+      <!-- 성공/실패 요약 -->
+      <div class="row mt-3">
+        <div class="col-6">
+          <div class="bg-success bg-opacity-10 rounded-3 p-2 text-center">
+            <h3 class="mb-0 fw-bold text-success">
+              {{ exercise.success_count }}
+            </h3>
+            <small class="text-muted">성공</small>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="bg-danger bg-opacity-10 rounded-3 p-2 text-center">
+            <h3 class="mb-0 fw-bold text-danger">{{ exercise.fail_count }}</h3>
+            <small class="text-muted">실패</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- 하단 버튼 -->
+<div class="d-flex justify-content-between mb-5">
+  <a href="/history" class="btn btn-outline-secondary rounded-pill">
+    <i class="fas fa-calendar-alt me-1"></i> 기록 보기
+  </a>
+  <a href="/progress-graph" class="btn btn-primary rounded-pill">
+    <i class="fas fa-chart-line me-1"></i> 진행 추이
+  </a>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // 카드에 탭 효과 추가
+    const cards = document.querySelectorAll(".exercise-detail-card");
+    cards.forEach((card) => {
+      card.addEventListener("click", function () {
+        // 간단한 터치 피드백 효과
+        this.style.transform = "scale(0.98)";
+
+        // 터치 피드백
+        if ("vibrate" in navigator) {
+          navigator.vibrate(30);
+        }
+
+        // 원래 크기로 복원
+        setTimeout(() => {
+          this.style.transform = "scale(1)";
+        }, 150);
+      });
+    });
+
+    // 페이지 로드 시 애니메이션 효과
+    setTimeout(() => {
+      cards.forEach((card, index) => {
+        setTimeout(() => {
+          card.style.opacity = "0";
+          card.style.transform = "translateY(20px)";
+
+          // 요소를 보이게 하면서 애니메이션 효과 추가
+          card.style.transition = "all 0.3s ease";
+          card.style.opacity = "1";
+          card.style.transform = "translateY(0)";
+        }, index * 100); // 각 카드마다 약간의 딜레이 추가
+      });
+    }, 300);
+  });
+</script>
+{% endblock %} {% block extra_css %}
+<style>
+  /* 세션 상세 페이지 스타일 */
+  .sets-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .set-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    font-size: 0.9rem;
+  }
+
+  .set-circle.success {
+    background-color: var(--success-color);
+    box-shadow: 0 2px 8px rgba(56, 176, 0, 0.3);
+  }
+
+  .set-circle.fail {
+    background-color: var(--danger-color);
+    box-shadow: 0 2px 8px rgba(217, 4, 41, 0.3);
+  }
+
+  .exercise-detail-card {
+    transition: transform 0.2s ease;
+    border-radius: 15px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  /* 애니메이션 초기 상태 */
+  .exercise-detail-card {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+</style>
 {% endblock %}

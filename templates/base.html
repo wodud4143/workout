@@ -1,107 +1,754 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="운동 트래커">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+    <meta name="theme-color" content="#3a86ff">
+    <link rel="manifest" href="/static/manifest.json">
     <title>{% block title %}운동 트래커{% endblock %}</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Bootstrap 5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome 6 -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <!-- Google Fonts - 본고딕 & 노토 산스 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
     <!-- Custom CSS -->
     <style>
-        body {
-            padding-top: 20px;
-            padding-bottom: 40px;
+      :root {
+        --primary-color: #3a86ff;
+        --secondary-color: #4361ee;
+        --success-color: #38b000;
+        --danger-color: #d90429;
+        --warning-color: #ffbe0b;
+        --info-color: #3a86ff;
+        --light-color: #f8f9fa;
+        --dark-color: #212529;
+        --gray-color: #adb5bd;
+        --highlight-color: #4cc9f0;
+        --gradient-primary: linear-gradient(135deg, #3a86ff 0%, #4361ee 100%);
+        --gradient-success: linear-gradient(135deg, #38b000 0%, #57cc99 100%);
+        --gradient-danger: linear-gradient(135deg, #d90429 0%, #ef233c 100%);
+      }
+
+      body {
+        font-family: "Noto Sans KR", sans-serif;
+        padding-top: 0;
+        padding-bottom: 80px; /* 바텀 내비게이션을 위한 공간 */
+        background-color: #f8f9fa;
+        color: #212529;
+        overflow-x: hidden;
+      }
+
+      /* 모바일 스크롤 최적화 */
+      * {
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* 헤더 */
+      .app-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 20px 15px;
+        position: relative;
+        border-radius: 0 0 20px 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .app-header h2 {
+        font-weight: 700;
+        margin-bottom: 5px;
+        font-size: 1.5rem;
+      }
+
+      .app-header p {
+        margin-bottom: 0;
+        opacity: 0.8;
+        font-weight: 300;
+        font-size: 0.9rem;
+      }
+
+      /* 하단 내비게이션 */
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: white;
+        box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.1);
+        height: 65px;
+        z-index: 1000;
+        border-radius: 20px 20px 0 0;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 0 10px;
+      }
+
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--gray-color);
+        transition: all 0.3s ease;
+        padding: 8px 0;
+        width: 25%;
+      }
+
+      .nav-item.active {
+        color: var(--primary-color);
+      }
+
+      .nav-item i {
+        font-size: 1.2rem;
+        margin-bottom: 3px;
+      }
+
+      .nav-item span {
+        font-size: 0.7rem;
+        font-weight: 500;
+      }
+
+      /* 카드 디자인 */
+      .card {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s, box-shadow 0.3s;
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-header {
+        background-color: white;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 15px 20px;
+      }
+
+      .card-body {
+        padding: 20px;
+      }
+
+      /* 루틴 카드 */
+      .routine-card {
+        height: 150px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .routine-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.8) 0%,
+          rgba(255, 255, 255, 0.6) 100%
+        );
+        z-index: 1;
+      }
+
+      .routine-card-content {
+        position: relative;
+        z-index: 2;
+      }
+
+      .routine-card.push {
+        background: url("https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=500&auto=format&fit=crop")
+          center center/cover;
+      }
+
+      .routine-card.pull {
+        background: url("https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=500&auto=format&fit=crop")
+          center center/cover;
+      }
+
+      .routine-card.leg {
+        background: url("https://images.unsplash.com/photo-1434608519344-49d01f09b6b3?q=80&w=500&auto=format&fit=crop")
+          center center/cover;
+      }
+
+      /* 버튼 디자인 */
+      .btn {
+        border-radius: 50px;
+        padding: 8px 20px;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.875rem;
+        letter-spacing: 0.5px;
+        transition: all 0.3s;
+      }
+
+      .btn-primary {
+        background: var(--gradient-primary);
+        border: none;
+      }
+
+      .btn-success {
+        background: var(--gradient-success);
+        border: none;
+      }
+
+      .btn-danger {
+        background: var(--gradient-danger);
+        border: none;
+      }
+
+      .btn-lg {
+        padding: 12px 30px;
+        font-size: 1rem;
+      }
+
+      .btn-floating {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        position: fixed;
+        right: 20px;
+        bottom: 85px;
+        z-index: 999;
+      }
+
+      .btn-floating i {
+        font-size: 1.5rem;
+      }
+
+      /* 운동 아이템 */
+      .exercise-item {
+        background-color: white;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+      }
+
+      .exercise-item:active {
+        transform: scale(0.98);
+      }
+
+      /* 세트 동그라미 */
+      .sets-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .set-circle {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: var(--gray-color);
+        background-color: #f1f3f5;
+        border: 2px solid #e9ecef;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .set-circle.success {
+        background-color: var(--success-color);
+        color: white;
+        border-color: var(--success-color);
+        box-shadow: 0 4px 8px rgba(56, 176, 0, 0.3);
+      }
+
+      .set-circle.fail {
+        background-color: var(--danger-color);
+        color: white;
+        border-color: var(--danger-color);
+        box-shadow: 0 4px 8px rgba(217, 4, 41, 0.3);
+      }
+
+      .set-circle:active {
+        transform: scale(0.9);
+      }
+
+      /* 무게 스피너 */
+      .weight-spinner {
+        display: flex;
+        align-items: center;
+        background-color: white;
+        border-radius: 20px;
+        padding: 2px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .weight-spinner .form-control {
+        border: none;
+        box-shadow: none;
+        text-align: center;
+        font-weight: bold;
+        width: 50px;
+        padding: 6px 0;
+        margin: 0 2px;
+        background: transparent;
+      }
+
+      .weight-spinner .btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+      }
+
+      .weight-spinner .weight-dec-btn {
+        color: var(--danger-color);
+        border-color: #e9ecef;
+      }
+
+      .weight-spinner .weight-inc-btn {
+        color: var(--success-color);
+        border-color: #e9ecef;
+      }
+
+      /* 타이머 */
+      .timer {
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #3a86ff 0%, #4361ee 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-fill-color: transparent;
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+      }
+
+      .timer i {
+        margin-right: 8px;
+        color: var(--primary-color);
+      }
+
+      /* 모바일에서 터치 영역 확장 */
+      @media (max-width: 768px) {
+        .btn,
+        .set-circle,
+        input,
+        select {
+          min-height: 45px;
+          min-width: 45px;
         }
-        .navbar {
-            margin-bottom: 20px;
+
+        .input-group-text {
+          min-height: 45px;
         }
-        .routine-card {
-            transition: transform 0.3s;
-            margin-bottom: 20px;
+
+        .form-control {
+          min-height: 45px;
+          font-size: 1rem;
         }
-        .routine-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
+
         .exercise-item {
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            background-color: #f8f9fa;
+          padding: 15px;
         }
-        .set-circle {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            line-height: 40px;
-            border-radius: 50%;
-            text-align: center;
-            background-color: #e9ecef;
-            margin-right: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
+
+        .card-body {
+          padding: 15px;
         }
-        .set-circle.success {
-            background-color: #28a745;
-            color: white;
+      }
+
+      /* 애니메이션 */
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
         }
-        .set-circle.fail {
-            background-color: #dc3545;
-            color: white;
+        50% {
+          transform: scale(1.05);
         }
-        .timer {
-            font-size: 1.2rem;
-            color: #666;
-            margin-left: 15px;
+        100% {
+          transform: scale(1);
         }
+      }
+
+      .animate-pulse {
+        animation: pulse 2s infinite;
+      }
+
+      /* 무게 수정 폼 */
+      .weight-edit-form {
+        margin-top: 10px;
+      }
+
+      /* 푸터 */
+      footer {
+        padding: 15px 0;
+        color: #adb5bd;
+        margin-top: 30px;
+        font-size: 0.8rem;
+      }
     </style>
     {% block extra_css %}{% endblock %}
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="/">운동 트래커</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/">홈</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/history">운동 기록</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/progress-graph">진행 추이</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/settings">설정</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
+      <!-- 앱 헤더 -->
+      <div class="app-header">
+        <h2>{% block header_title %}운동 트래커{% endblock %}</h2>
+        <p>{% block header_subtitle %}건강한 몸을 위한 여정{% endblock %}</p>
+      </div>
 
-        <main>
-            {% block content %}{% endblock %}
-        </main>
+      <!-- 메인 콘텐츠 -->
+      <main>{% block content %}{% endblock %}</main>
 
-        <footer class="mt-5 text-center text-muted">
-            <p>&copy; 2025 운동 트래커 앱</p>
-        </footer>
+      <!-- 푸터 -->
+      <footer class="text-center">
+        <p>&copy; 2025 운동 트래커 앱</p>
+      </footer>
+    </div>
+
+    <!-- 하단 내비게이션 -->
+    <div class="bottom-nav">
+      <a
+        href="/"
+        class="nav-item {% if request.url.path == '/' %}active{% endif %}"
+      >
+        <i class="fas fa-home"></i>
+        <span>홈</span>
+      </a>
+      <a
+        href="/history"
+        class="nav-item {% if '/history' in request.url.path %}active{% endif %}"
+      >
+        <i class="fas fa-calendar-alt"></i>
+        <span>기록</span>
+      </a>
+      <a
+        href="/progress-graph"
+        class="nav-item {% if '/progress-graph' in request.url.path %}active{% endif %}"
+      >
+        <i class="fas fa-chart-line"></i>
+        <span>추이</span>
+      </a>
+      <a
+        href="/settings"
+        class="nav-item {% if '/settings' in request.url.path %}active{% endif %}"
+      >
+        <i class="fas fa-sliders-h"></i>
+        <span>설정</span>
+      </a>
     </div>
 
     <!-- Bootstrap & Popper JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
+    <!-- Active Navigation Item -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // 현재 URL에 따라 하단 탭 활성화
+        const currentPath = window.location.pathname;
+        document.querySelectorAll(".nav-item").forEach((item) => {
+          const href = item.getAttribute("href");
+          if (
+            currentPath === href ||
+            (href !== "/" && currentPath.startsWith(href))
+          ) {
+            item.classList.add("active");
+          } else {
+            item.classList.remove("active");
+          }
+        });
+
+        // 모바일에서 터치 반응성 향상
+        document.addEventListener("touchstart", function () {}, {
+          passive: true,
+        });
+      });
+    </script>
+    <!-- iOS 호환 진동 및 알림 스크립트 -->
+    <script>
+      function vibrate(duration) {
+        // iOS에서는 Navigator.vibrate 지원하지 않음
+        if ("vibrate" in navigator) {
+          navigator.vibrate(duration);
+        } else if (window.Vibration) {
+          // 일부 오래된 iOS 버전에서 사용
+          window.Vibration.vibrate(duration);
+        }
+
+        // iOS에서는 진동 대신 소리로 대체 가능
+        if (isIOS() && window.timerSoundEnabled !== false) {
+          try {
+            // 짧은 클릭 소리 재생 (iOS에서 허용 가능)
+            const clickSound = new Audio(
+              "data:audio/mp3;base64,SUQzAwAAAAAAJlRJVDIAAAAZAAAAaU9TIENsaWNrIFNvdW5kIEZlZWRiYWNrAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwAAAEWQAgBwTgAIjVCSDjnZARDAANmoACAm//705//+v93/oABBYDAYBAIGAwMECgUzE0DAYGBwQMBgYIGCBn//T9f/T/9fEAgEAf8QC///+JBAKAgP///////////pAgCAgAP//////8QBAUBAEB9NQAAAAAAAAAAAAAFVSVRMMV9UVjwAAAAAAAAAAAAAAAMucGl0LnR2AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+            );
+            clickSound.volume = 0.3; // 볼륨 조절
+            clickSound.play().catch((e) => {
+              console.log("iOS 클릭 소리 재생 실패:", e);
+            });
+          } catch (e) {
+            console.error("소리 재생 오류:", e);
+          }
+        }
+      }
+
+      // iOS 디바이스 체크 함수
+      function isIOS() {
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      }
+
+      // iOS에서 오디오 초기화 (사용자 상호작용 필요)
+      function initializeAudioForIOS() {
+        if (isIOS()) {
+          // 유저 제스처로 오디오 초기화 (한 번의 상호작용 필요)
+          document.body.addEventListener(
+            "touchstart",
+            function () {
+              const silentSound = new Audio(
+                "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAAbsBmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+              );
+              silentSound.volume = 0.01;
+              silentSound.play().catch((e) => {
+                console.log("iOS 오디오 초기화 실패:", e);
+              });
+            },
+            { once: true }
+          );
+        }
+      }
+
+      // 타이머 알림음 재생 함수 (routine.html에서 수정)
+      function playTimerEndSound() {
+        if (timerSettings.sound) {
+          try {
+            // iOS에서 오디오 초기화 확인
+            if (isIOS() && !window.audioInitialized) {
+              // 소리를 바로 재생할 수 없으면 대체 피드백 제공
+              window.timerSoundPending = true;
+              console.log(
+                "iOS에서 오디오 초기화 필요, 사용자 상호작용 대기 중"
+              );
+              return;
+            }
+
+            const audio = new Audio(timerEndSoundBase64);
+            audio.volume = 0.5;
+
+            // iOS 호환성을 위한 별도 처리
+            if (isIOS()) {
+              // iOS에서는 play()가 promise를 반환
+              audio.play().catch((e) => {
+                console.log("타이머 알림음 재생 실패:", e);
+                // 소리 대신 시각적 알림 표시
+                showVisualAlert();
+              });
+            } else {
+              // 다른 브라우저에서는 일반적인 방법으로 재생
+              audio.play();
+            }
+          } catch (e) {
+            console.error("알림음 재생 중 오류:", e);
+            // 소리 대신 시각적 알림 표시
+            showVisualAlert();
+          }
+        }
+
+        if (timerSettings.vibration) {
+          vibrate(300); // 타이머 종료 시 진동 (300ms)
+        }
+      }
+
+      // 시각적 알림 대체 함수
+      function showVisualAlert() {
+        // 화면 전체를 덮는 알림 오버레이 생성
+        const alertOverlay = document.createElement("div");
+        alertOverlay.style.position = "fixed";
+        alertOverlay.style.top = "0";
+        alertOverlay.style.left = "0";
+        alertOverlay.style.width = "100%";
+        alertOverlay.style.height = "100%";
+        alertOverlay.style.backgroundColor = "rgba(255, 87, 87, 0.3)";
+        alertOverlay.style.zIndex = "9999";
+        alertOverlay.style.display = "flex";
+        alertOverlay.style.justifyContent = "center";
+        alertOverlay.style.alignItems = "center";
+        alertOverlay.style.animation = "flash-animation 0.5s ease-in-out 3";
+
+        // 알림 메시지
+        const alertMessage = document.createElement("div");
+        alertMessage.style.backgroundColor = "white";
+        alertMessage.style.color = "#dc3545";
+        alertMessage.style.padding = "20px";
+        alertMessage.style.borderRadius = "10px";
+        alertMessage.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
+        alertMessage.style.fontSize = "1.5rem";
+        alertMessage.style.fontWeight = "bold";
+        alertMessage.innerHTML =
+          '<i class="fas fa-stopwatch me-2"></i> 타이머 종료!';
+
+        // 애니메이션 스타일 추가
+        const styleElement = document.createElement("style");
+        styleElement.textContent = `
+        @keyframes flash-animation {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    `;
+        document.head.appendChild(styleElement);
+
+        alertOverlay.appendChild(alertMessage);
+        document.body.appendChild(alertOverlay);
+
+        // 클릭하면 알림 닫기
+        alertOverlay.addEventListener("click", function () {
+          alertOverlay.remove();
+        });
+
+        // 2초 후 자동으로 알림 제거
+        setTimeout(() => {
+          alertOverlay.remove();
+        }, 2000);
+      }
+
+      // iOS 오디오 초기화 실행
+      document.addEventListener("DOMContentLoaded", function () {
+        window.audioInitialized = false;
+        window.timerSoundPending = false;
+
+        initializeAudioForIOS();
+
+        // 사용자 상호작용으로 오디오 초기화 처리
+        document.body.addEventListener("click", function () {
+          if (isIOS() && !window.audioInitialized) {
+            const silentSound = new Audio(
+              "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAAbsBmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZ"
+            );
+            silentSound.volume = 0.01;
+            silentSound
+              .play()
+              .then(() => {
+                window.audioInitialized = true;
+                console.log("iOS 오디오 초기화 성공");
+
+                // 대기 중인 타이머 알림음이 있으면 재생
+                if (window.timerSoundPending) {
+                  playTimerEndSound();
+                  window.timerSoundPending = false;
+                }
+              })
+              .catch((e) => {
+                console.log("iOS 오디오 초기화 실패:", e);
+              });
+          }
+        });
+      });
+    </script>
+    <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/static/sw.js')
+          .then(registration => {
+            console.log('서비스 워커가 등록되었습니다:', registration.scope);
+          })
+          .catch(error => {
+            console.log('서비스 워커 등록 실패:', error);
+          });
+      });
+    }
+
+    // iOS에서 홈 화면에 추가하라는 배너 표시
+      document.addEventListener('DOMContentLoaded', function () {
+        if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream && window.matchMedia('(display-mode: browser)').matches) {
+          if (!localStorage.getItem('pwaInstallBannerShown')) {
+            setTimeout(showIOSInstallBanner, 3000);
+          }
+        }
+      });
+
+    function showIOSInstallBanner() {
+      const banner = document.createElement('div');
+      banner.style.position = 'fixed';
+      banner.style.bottom = '0';
+      banner.style.left = '0';
+      banner.style.right = '0';
+      banner.style.backgroundColor = '#3a86ff';
+      banner.style.color = 'white';
+      banner.style.padding = '12px 20px';
+      banner.style.textAlign = 'center';
+      banner.style.zIndex = '9999';
+      banner.style.boxShadow = '0 -2px 10px rgba(0,0,0,0.2)';
+      banner.style.display = 'flex';
+      banner.style.alignItems = 'center';
+      banner.style.justifyContent = 'space-between';
+
+      banner.innerHTML = `
+        <div>
+          <p style="margin: 0; font-weight: bold;">주소창 없이 사용하기</p>
+          <p style="margin: 5px 0 0 0; font-size: 0.8rem;">
+            Safari에서 <i class="fas fa-share-square"></i> 버튼을 누른 다음<br>
+            "홈 화면에 추가"를 선택하세요
+          </p>
+        </div>
+        <button id="closePwaBanner" style="background: none; border: 1px solid white; color: white; padding: 8px 12px; border-radius: 50px; font-size: 0.8rem;">
+          닫기
+        </button>
+      `;
+
+      document.body.appendChild(banner);
+
+      document.getElementById('closePwaBanner').addEventListener('click', () => {
+        banner.remove();
+        localStorage.setItem('pwaInstallBannerShown', 'true');
+      });
+    }
+    </script>
+
+
     {% block scripts %}{% endblock %}
-</body>
+  </body>
 </html>

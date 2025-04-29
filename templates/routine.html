@@ -1,327 +1,540 @@
-{% extends "base.html" %}
-
-{% block title %}{{ routine_type|capitalize }} 루틴{% endblock %}
-
-{% block content %}
-<div class="row">
-    <div class="col-12">
-        <h2 class="mb-4">{{ routine_type|capitalize }} 루틴 운동</h2>
-        
-        {% if already_done_today %}
-        <div class="alert alert-warning" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <strong>주의!</strong> 오늘 이미 {{ routine_type|capitalize }} 루틴을 수행했습니다. 계속 진행하시겠습니까?
-            <div class="mt-2">
-                <a href="/" class="btn btn-outline-primary">메인으로 돌아가기</a>
-                <button id="continueAnyway" class="btn btn-warning">그래도 계속하기</button>
-            </div>
-        </div>
-        <div id="workoutContent" style="{% if already_done_today %}display: none;{% endif %}">
-        {% endif %}
-        
-        <p class="lead">각 운동의 세트를 완료할 때마다 동그라미를 클릭하세요.</p>
-        <p><strong>클릭 한 번:</strong> 성공 (1분 타이머) | <strong>클릭 두 번:</strong> 실패 (1분 30초 타이머) | <strong>클릭 세 번:</strong> 초기화</p>
-        
-        {% if already_done_today %}
-        </div>
-        {% endif %}
+{% extends "base.html" %} {% block title %}{{ routine_type|capitalize }} 루틴{%
+endblock %} {% block header_title %}{{ routine_type|capitalize }} 루틴{%
+endblock %} {% block header_subtitle %}운동의 세트를 완료할 때마다 탭하세요{%
+endblock %} {% block content %} {% if already_done_today %}
+<div class="alert alert-warning rounded-4 mb-4 shadow-sm" role="alert">
+  <div class="d-flex align-items-center">
+    <i class="fas fa-exclamation-circle fs-3 me-3 text-warning"></i>
+    <div>
+      <h5 class="fw-bold mb-1">
+        오늘 이미 {{ routine_type|capitalize }} 루틴을 수행했습니다
+      </h5>
+      <p class="mb-2 small">계속 진행하시겠습니까?</p>
+      <div class="mt-1">
+        <a href="/" class="btn btn-sm btn-outline-secondary me-2">
+          <i class="fas fa-arrow-left me-1"></i> 메인으로
+        </a>
+        <button id="continueAnyway" class="btn btn-sm btn-warning">
+          <i class="fas fa-check me-1"></i> 계속하기
+        </button>
+      </div>
     </div>
+  </div>
 </div>
+<div
+  id="workoutContent"
+  style="{% if already_done_today %}display: none;{% endif %}"
+>
+  {% endif %}
 
-<div id="exerciseList">
+  <!-- 운동 안내 -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6 class="fw-bold">
+            <i class="fas fa-info-circle me-2 text-primary"></i>세트 수행 방법
+          </h6>
+          <div class="d-flex mt-2 small">
+            <div class="me-3 text-center">
+              <div class="set-circle">1</div>
+              <div class="text-center mt-1">초기상태</div>
+              <div class="text-muted small">(한 번 탭)</div>
+            </div>
+            <div class="me-3 text-center">
+              <div class="set-circle success">1</div>
+              <div class="text-center mt-1">성공</div>
+              <div class="text-muted small">(두 번 탭)</div>
+            </div>
+            <div class="text-center">
+              <div class="set-circle fail">1</div>
+              <div class="text-center mt-1">실패</div>
+              <div class="text-muted small">(세 번 탭)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 운동 리스트 -->
+  <div id="exerciseList">
     {% for exercise in exercises %}
-    <div class="exercise-item" data-exercise-name="{{ exercise.name }}" data-weight="{{ exercise.weight }}">
-        <div class="row">
-            <div class="col-md-8">
-                <h4>{{ exercise.name }}</h4>
-                <p>
-                    {{ exercise.sets }}세트 x {{ exercise.reps }}회
-                    <span class="badge bg-primary">
-                        목표 무게: 
-                        <span class="weight-display">{{ exercise.weight }}</span>kg
-                        <button type="button" class="btn btn-sm btn-light ms-1 edit-weight-btn" 
-                                data-exercise-name="{{ exercise.name }}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </span>
-                </p>
-                <!-- 무게 편집 폼 (기본적으로 숨김) -->
-                <div class="weight-edit-form" style="display: none;">
-                    <div class="input-group input-group-sm mb-2" style="max-width: 200px;">
-                        <input type="number" class="form-control weight-input" value="{{ exercise.weight }}" min="0" step="0.5">
-                        <span class="input-group-text">kg</span>
-                        <button class="btn btn-success save-weight-btn" type="button" 
-                                data-routine="{{ routine_type }}" data-exercise="{{ exercise.name }}">
-                            <i class="fas fa-check"></i>
-                        </button>
-                        <button class="btn btn-secondary cancel-weight-btn" type="button">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 text-end">
-                <span class="timer" style="display: none;">00:00</span>
-            </div>
+    <div
+      class="exercise-item"
+      data-exercise-name="{{ exercise.name }}"
+      data-weight="{{ exercise.weight }}"
+    >
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <div>
+          <h5 class="fw-bold mb-1">{{ exercise.name }}</h5>
+          <p class="mb-0 text-muted small">
+            <span class="badge bg-light text-dark me-1"
+              >{{ exercise.sets }}세트</span
+            >
+            <span class="badge bg-light text-dark">{{ exercise.reps }}회</span>
+          </p>
         </div>
-        
-        <div class="sets-container mt-2">
-            {% for i in range(1, exercise.sets + 1) %}
-            <span class="set-circle" data-set="{{ i }}">{{ i }}</span>
-            {% endfor %}
+
+        <div class="d-flex align-items-center">
+          <div class="weight-spinner">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary weight-dec-btn"
+            >
+              <i class="fas fa-minus"></i>
+            </button>
+            <input
+              type="number"
+              class="form-control weight-input"
+              value="{{ exercise.weight }}"
+              min="0"
+              step="0.5"
+              readonly
+              style="width: 60px; text-align: center"
+            />
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary weight-inc-btn"
+            >
+              <i class="fas fa-plus"></i>
+            </button>
+            <span class="ms-1">kg</span>
+          </div>
         </div>
+      </div>
+
+      <!-- 타이머 영역 -->
+      <div class="timer" style="display: none">
+        <i class="fas fa-stopwatch"></i>
+        <span class="timer-display">00:00</span>
+      </div>
+
+      <!-- 세트 버튼 -->
+      <div class="sets-container">
+        {% for i in range(1, exercise.sets + 1) %}
+        <span class="set-circle" data-set="{{ i }}">{{ i }}</span>
+        {% endfor %}
+      </div>
     </div>
     {% endfor %}
+  </div>
+
+  <!-- 완료 버튼 -->
+  <div class="d-grid gap-2 mt-4 mb-5">
+    <button id="completeWorkout" class="btn btn-success btn-lg">
+      <i class="fas fa-check-circle me-2"></i>운동 완료
+    </button>
+  </div>
+
+  {% if already_done_today %}
 </div>
-
-<div class="row mt-4">
-    <div class="col-12">
-        <button id="completeWorkout" class="btn btn-success btn-lg">운동 완료</button>
-    </div>
-</div>
-
-{% if already_done_today %}
-</div>  <!-- workoutContent div 종료 -->
-{% endif %}
-
-{% endblock %}
-
-{% block scripts %}
+<!-- workoutContent div 종료 -->
+{% endif %} {% endblock %} {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener("DOMContentLoaded", function () {
     // base64로 인코딩된 타이머 알림음
-    // 간단한 "삐" 소리의 MP3 인코딩 (실제 사용 시 더 좋은 알림음으로 교체 가능)
-    const timerEndSoundBase64 = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAADwAD///////////////////////////////////////////8AAAA8TEFNRTMuMTAwBK8AAAAAAAAAABUgJAJAQAAARtMAAcBERT3t//uQZAAAA+tHy4UYwAI7wDlRoIgAR0QJMDTEACjzgSbGmCAAAAAAASQgAAMdHCBt//qqqgQCP//+qrN9dwABkAQvDuoF2QHAN8HgEHvg+KAgIH//8YCAQGfEA2D/6gYCAvj4QBAAwBAMBAE36+eeOjx+Of/lnz/NXn8+5/P/v/////////////////////////Z0KM5hhLLj4//6Y6NHl28//pQrG63cv/Ot0LooINTBCnC/ohSrJKPGQugTKMUYnwBVNHKi+EtoA6MsqaY86BoERtgLoGkQz59l6CiUJCnRVoVCNCpEdKLp8ufFYcGq5c4GFNB5OdFJELn7+u6VZKltjK6WUybsIdLZw8wptMyVJhxVeF1kB+HzliOxY7XfAVOTp46cLVBKpD3NZNGiuHKVi0tU8iyVKqW1q6nzPIxRLWTZa+OIy0tuaVsMVUYaP/qVFAAAAAAA';
-    
+    const timerEndSoundBase64 =
+      "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAADwAD///////////////////////////////////////////8AAAA8TEFNRTMuMTAwBK8AAAAAAAAAABUgJAJAQAAARtMAAcBERT3t//uQZAAAA+tHy4UYwAI7wDlRoIgAR0QJMDTEACjzgSbGmCAAAAAAASQgAAMdHCBt//qqqgQCP//+qrN9dwABkAQvDuoF2QHAN8HgEHvg+KAgIH//8YCAQGfEA2D/6gYCAvj4QBAAwBAMBAE36+eeOjx+Of/lnz/NXn8+5/P/v/////////////////////////Z0KM5hhLLj4//6Y6NHl28//pQrG63cv/Ot0LooINTBCnC/ohSrJKPGQugTKMUYnwBVNHKi+EtoA6MsqaY86BoERtgLoGkQz59l6CiUJCnRVoVCNCpEdKLp8ufFYcGq5c4GFNB5OdFJELn7+u6VZKltjK6WUybsIdLZw8wptMyVJhxVeF1kB+HzliOxY7XfAVOTp46cLVBKpD3NZNGiuHKVi0tU8iyVKqW1q6nzPIxRLWTZa+OIy0tuaVsMVUYaP/qVFAAAAAAA";
+
+    // 타이머 설정 로드
+    const timerSettings = loadTimerSettings();
+
+    // 진동 함수
+    function vibrate(duration) {
+      if ("vibrate" in navigator) {
+        navigator.vibrate(duration);
+      }
+    }
+
     // 알림음 재생 함수
     function playTimerEndSound() {
+      if (timerSettings.sound) {
         try {
-            const audio = new Audio(timerEndSoundBase64);
-            audio.play().catch(e => console.log('알림음 재생 에러:', e));
+          const audio = new Audio(timerEndSoundBase64);
+          audio.play().catch((e) => console.log("알림음 재생 에러:", e));
         } catch (e) {
-            console.error('알림음 재생 중 오류:', e);
+          console.error("알림음 재생 중 오류:", e);
         }
+      }
+
+      if (timerSettings.vibration) {
+        vibrate(300); // 타이머 종료 시 진동 (300ms)
+      }
     }
-    
+
     // 이미 오늘 운동한 경우 계속하기 버튼
-    const continueAnywayBtn = document.getElementById('continueAnyway');
+    const continueAnywayBtn = document.getElementById("continueAnyway");
     if (continueAnywayBtn) {
-        continueAnywayBtn.addEventListener('click', function() {
-            document.getElementById('workoutContent').style.display = 'block';
-            this.closest('.alert').remove();
-        });
+      continueAnywayBtn.addEventListener("click", function () {
+        document.getElementById("workoutContent").style.display = "block";
+        this.closest(".alert").remove();
+      });
     }
+
     // 타이머 관련 변수 및 함수
     const timers = {};
-    
+
     function startTimer(element, duration) {
-        // 이미 실행 중인 타이머가 있으면 중지
-        const timerElement = element.querySelector('.timer');
-        const exerciseName = element.dataset.exerciseName;
-        
-        if (timers[exerciseName]) {
-            clearInterval(timers[exerciseName]);
+      // 이미 실행 중인 타이머가 있으면 중지
+      const timerElement = element.querySelector(".timer");
+      const timerDisplay = element.querySelector(".timer-display");
+      const exerciseName = element.dataset.exerciseName;
+
+      if (timers[exerciseName]) {
+        clearInterval(timers[exerciseName]);
+      }
+
+      // 타이머 초기화
+      let timeLeft = duration;
+      timerDisplay.textContent = formatTime(timeLeft);
+      timerElement.style.display = "flex";
+
+      // 시작 진동 피드백
+      if (timerSettings.vibration) {
+        vibrate(100);
+      }
+
+      // 타이머 시작
+      timers[exerciseName] = setInterval(function () {
+        timeLeft -= 1;
+
+        if (timeLeft <= 0) {
+          clearInterval(timers[exerciseName]);
+          timerElement.style.display = "none";
+          // 알림음 재생 및 진동
+          playTimerEndSound();
+        } else {
+          timerDisplay.textContent = formatTime(timeLeft);
+
+          // 마지막 5초 카운트다운에서는 강조 효과
+          if (timeLeft <= 5) {
+            timerDisplay.classList.add("text-danger");
+            // 각 초마다 짧은 진동
+            if (timerSettings.vibration) {
+              vibrate(50);
+            }
+          } else {
+            timerDisplay.classList.remove("text-danger");
+          }
         }
-        
-        // 타이머 초기화
-        let timeLeft = duration;
-        timerElement.textContent = formatTime(timeLeft);
-        timerElement.style.display = 'inline';
-        
-        // 타이머 시작
-        timers[exerciseName] = setInterval(function() {
-            timeLeft -= 1;
-            
-            if (timeLeft <= 0) {
-                clearInterval(timers[exerciseName]);
-                timerElement.style.display = 'none';
-                // base64로 인코딩된 알림음 재생
-                playTimerEndSound();
-            } else {
-                timerElement.textContent = formatTime(timeLeft);
-            }
-        }, 1000);
+      }, 1000);
     }
-    
+
     function formatTime(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins
+        .toString()
+        .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     }
-    
+
     // 세트 동그라미 클릭 이벤트
-    document.querySelectorAll('.set-circle').forEach(circle => {
-        circle.addEventListener('click', function() {
-            const exerciseItem = this.closest('.exercise-item');
-            
-            if (!this.classList.contains('success') && !this.classList.contains('fail')) {
-                // 첫 번째 클릭: 성공 (초록색) + 1분 타이머
-                this.classList.add('success');
-                startTimer(exerciseItem, 60); // 1분 = 60초
-            } else if (this.classList.contains('success')) {
-                // 두 번째 클릭: 실패 (빨간색) + 1분 30초 타이머
-                this.classList.remove('success');
-                this.classList.add('fail');
-                startTimer(exerciseItem, 90); // 1분 30초 = 90초
-            } else {
-                // 세 번째 클릭: 초기화
-                this.classList.remove('fail');
-                // 타이머 중지 및 숨기기
-                const exerciseName = exerciseItem.dataset.exerciseName;
-                if (timers[exerciseName]) {
-                    clearInterval(timers[exerciseName]);
-                    exerciseItem.querySelector('.timer').style.display = 'none';
-                }
-            }
-        });
+    document.querySelectorAll(".set-circle").forEach((circle) => {
+      circle.addEventListener("click", function () {
+        const exerciseItem = this.closest(".exercise-item");
+
+        // 간단한 터치 피드백
+        if (timerSettings.vibration) {
+          vibrate(50);
+        }
+
+        if (
+          !this.classList.contains("success") &&
+          !this.classList.contains("fail")
+        ) {
+          // 첫 번째 클릭: 성공 (초록색) + 설정된 타이머
+          this.classList.add("success");
+          // 애니메이션 효과
+          this.classList.add("animate-pulse");
+          setTimeout(() => this.classList.remove("animate-pulse"), 300);
+          startTimer(exerciseItem, timerSettings.successDuration); // 성공 타이머
+        } else if (this.classList.contains("success")) {
+          // 두 번째 클릭: 실패 (빨간색) + 설정된 타이머
+          this.classList.remove("success");
+          this.classList.add("fail");
+          // 애니메이션 효과
+          this.classList.add("animate-pulse");
+          setTimeout(() => this.classList.remove("animate-pulse"), 300);
+          startTimer(exerciseItem, timerSettings.failDuration); // 실패 타이머
+        } else {
+          // 세 번째 클릭: 초기화
+          this.classList.remove("fail");
+          this.classList.add("animate-pulse");
+          setTimeout(() => this.classList.remove("animate-pulse"), 300);
+          // 타이머 중지 및 숨기기
+          const exerciseName = exerciseItem.dataset.exerciseName;
+          if (timers[exerciseName]) {
+            clearInterval(timers[exerciseName]);
+            exerciseItem.querySelector(".timer").style.display = "none";
+          }
+        }
+
+        // 완료된 세트 수 확인하여 운동 완료 버튼 색상 변경
+        updateCompleteButtonState();
+      });
     });
-    
+
+    // 완료 버튼 상태 업데이트
+    function updateCompleteButtonState() {
+      const totalSets = document.querySelectorAll(".set-circle").length;
+      const completedSets = document.querySelectorAll(
+        ".set-circle.success, .set-circle.fail"
+      ).length;
+
+      const completeBtn = document.getElementById("completeWorkout");
+
+      if (completedSets > 0) {
+        completeBtn.classList.remove("btn-success");
+        completeBtn.classList.add("btn-primary");
+
+        if (completedSets === totalSets) {
+          // 모든 세트 완료
+          completeBtn.classList.add("animate-pulse");
+          setTimeout(() => completeBtn.classList.remove("animate-pulse"), 1000);
+        }
+      } else {
+        completeBtn.classList.remove("btn-primary");
+        completeBtn.classList.add("btn-success");
+      }
+    }
+
     // 운동 완료 버튼 클릭 이벤트
-    document.getElementById('completeWorkout').addEventListener('click', function() {
+    document
+      .getElementById("completeWorkout")
+      .addEventListener("click", function () {
+        // 완료 버튼에 로딩 상태 표시
+        this.disabled = true;
+        this.innerHTML =
+          '<span class="spinner-border spinner-border-sm me-2"></span>저장 중...';
+
         // 세션 데이터 수집
         const sessionData = {
-            routine_type: '{{ routine_type }}',
-            exercises: []
+          routine_type: "{{ routine_type }}",
+          exercises: [],
         };
-        
-        document.querySelectorAll('.exercise-item').forEach(exerciseItem => {
-            const exerciseName = exerciseItem.dataset.exerciseName;
-            const weight = parseFloat(exerciseItem.dataset.weight);
-            const sets = [];
-            
-            exerciseItem.querySelectorAll('.set-circle').forEach(circle => {
-                let status = 'not_done';
-                if (circle.classList.contains('success')) {
-                    status = 'success';
-                } else if (circle.classList.contains('fail')) {
-                    status = 'fail';
-                }
-                
-                sets.push({
-                    set_number: parseInt(circle.dataset.set, 10),
-                    status: status
-                });
-            });
-            
-            // 최소한 하나의 세트라도 완료된 운동만 포함
-            const completedSets = sets.filter(set => set.status !== 'not_done');
-            if (completedSets.length > 0) {
-                sessionData.exercises.push({
-                    name: exerciseName,
-                    weight: weight,
-                    sets: sets
-                });
+
+        document.querySelectorAll(".exercise-item").forEach((exerciseItem) => {
+          const exerciseName = exerciseItem.dataset.exerciseName;
+          const weight = parseFloat(exerciseItem.dataset.weight);
+          const sets = [];
+
+          exerciseItem.querySelectorAll(".set-circle").forEach((circle) => {
+            let status = "not_done";
+            if (circle.classList.contains("success")) {
+              status = "success";
+            } else if (circle.classList.contains("fail")) {
+              status = "fail";
             }
+
+            sets.push({
+              set_number: parseInt(circle.dataset.set, 10),
+              status: status,
+            });
+          });
+
+          // 최소한 하나의 세트라도 완료된 운동만 포함
+          const completedSets = sets.filter((set) => set.status !== "not_done");
+          if (completedSets.length > 0) {
+            sessionData.exercises.push({
+              name: exerciseName,
+              weight: weight,
+              sets: sets,
+            });
+          }
         });
-        
+
         // 서버에 세션 데이터 전송
-        fetch('/save-session', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(sessionData)
+        fetch("/save-session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(sessionData),
         })
-        .then(response => response.json())
-        .then(data => {
+          .then((response) => response.json())
+          .then((data) => {
             if (data.success) {
-                alert('운동이 성공적으로 저장되었습니다!');
-                window.location.href = '/';
+              // 성공 토스트 메시지 표시
+              showToast("운동이 성공적으로 저장되었습니다!", "success");
+
+              // 저장 성공 시 진동 피드백
+              if (timerSettings.vibration) {
+                vibrate([100, 50, 100]);
+              }
+
+              // 1초 후 메인 페이지로 리다이렉트
+              setTimeout(() => {
+                window.location.href = "/";
+              }, 1000);
             } else {
-                alert('운동 저장 중 오류가 발생했습니다.');
+              // 오류 발생 시 버튼 복원
+              this.disabled = false;
+              this.innerHTML =
+                '<i class="fas fa-check-circle me-2"></i>운동 완료';
+
+              showToast("운동 저장 중 오류가 발생했습니다.", "danger");
             }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            // 오류 발생 시 버튼 복원
+            this.disabled = false;
+            this.innerHTML =
+              '<i class="fas fa-check-circle me-2"></i>운동 완료';
+
+            showToast("운동 저장 중 오류가 발생했습니다.", "danger");
+          });
+      });
+
+    // 토스트 메시지 표시 함수
+    function showToast(message, type) {
+      // 기존 토스트가 있다면 제거
+      const existingToasts = document.querySelectorAll(".toast-container");
+      existingToasts.forEach((toast) => toast.remove());
+
+      // 새 토스트 생성
+      const toastContainer = document.createElement("div");
+      toastContainer.className =
+        "toast-container position-fixed bottom-0 start-50 translate-middle-x p-3";
+      toastContainer.style.zIndex = "1100";
+
+      const toastHTML = `
+            <div class="toast show bg-${type} text-white" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-body d-flex align-items-center">
+                    <i class="fas fa-${
+                      type === "success" ? "check-circle" : "exclamation-circle"
+                    } me-2"></i>
+                    ${message}
+                </div>
+            </div>
+        `;
+
+      toastContainer.innerHTML = toastHTML;
+      document.body.appendChild(toastContainer);
+
+      // 3초 후 토스트 제거
+      setTimeout(() => {
+        toastContainer.remove();
+      }, 3000);
+    }
+
+    // 무게 스피너 기능 추가
+    setupWeightSpinners();
+
+    function setupWeightSpinners() {
+      // 무게 감소 버튼
+      document.querySelectorAll(".weight-dec-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          const exerciseItem = this.closest(".exercise-item");
+          const weightInput = exerciseItem.querySelector(".weight-input");
+          const weightValue = parseFloat(weightInput.value);
+
+          if (weightValue >= 0.5) {
+            const newWeight = weightValue - 0.5;
+
+            // 입력 필드와 데이터 속성 모두 업데이트
+            weightInput.value = newWeight.toFixed(1);
+            exerciseItem.dataset.weight = newWeight.toFixed(1);
+
+            // 진동 피드백
+            if (timerSettings.vibration) {
+              vibrate(30);
+            }
+
+            // 서버에 무게 업데이트
+            updateWeightOnServer(exerciseItem.dataset.exerciseName, newWeight);
+          }
+        });
+      });
+
+      // 무게 증가 버튼
+      document.querySelectorAll(".weight-inc-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          const exerciseItem = this.closest(".exercise-item");
+          const weightInput = exerciseItem.querySelector(".weight-input");
+          const weightValue = parseFloat(weightInput.value);
+
+          const newWeight = weightValue + 0.5;
+
+          // 입력 필드와 데이터 속성 모두 업데이트
+          weightInput.value = newWeight.toFixed(1);
+          exerciseItem.dataset.weight = newWeight.toFixed(1);
+
+          // 진동 피드백
+          if (timerSettings.vibration) {
+            vibrate(30);
+          }
+
+          // 서버에 무게 업데이트
+          updateWeightOnServer(exerciseItem.dataset.exerciseName, newWeight);
+        });
+      });
+    }
+
+    // 서버에 무게 업데이트 함수
+    function updateWeightOnServer(exerciseName, weight) {
+      const formData = new FormData();
+      formData.append("routine_type", "{{ routine_type }}");
+      formData.append("exercise_name", exerciseName);
+      formData.append("weight", weight);
+
+      fetch("/update-weight-during-workout", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (!data.success) {
+            console.error("무게 업데이트 실패:", data.error);
+          }
         })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('운동 저장 중 오류가 발생했습니다.');
+        .catch((error) => {
+          console.error("무게 업데이트 오류:", error);
         });
-    });
-    
-    // 무게 편집 기능
-    document.querySelectorAll('.edit-weight-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const exerciseItem = this.closest('.exercise-item');
-            const weightDisplay = exerciseItem.querySelector('.weight-display');
-            const weightEditForm = exerciseItem.querySelector('.weight-edit-form');
-            const weightInput = exerciseItem.querySelector('.weight-input');
-            
-            // 현재 무게 값을 입력 필드에 설정
-            weightInput.value = weightDisplay.textContent.trim();
-            
-            // 폼 표시
-            weightDisplay.parentNode.style.display = 'none';
-            weightEditForm.style.display = 'block';
-        });
-    });
-    
-    // 무게 변경 취소 버튼
-    document.querySelectorAll('.cancel-weight-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const exerciseItem = this.closest('.exercise-item');
-            const weightDisplay = exerciseItem.querySelector('.weight-display').parentNode;
-            const weightEditForm = exerciseItem.querySelector('.weight-edit-form');
-            
-            // 폼 숨기기 및 원래 표시 복원
-            weightEditForm.style.display = 'none';
-            weightDisplay.style.display = 'inline-block';
-        });
-    });
-    
-    // 무게 저장 버튼
-    document.querySelectorAll('.save-weight-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const exerciseItem = this.closest('.exercise-item');
-            const routineType = this.dataset.routine;
-            const exerciseName = this.dataset.exercise;
-            const weightDisplay = exerciseItem.querySelector('.weight-display');
-            const weightInput = exerciseItem.querySelector('.weight-input');
-            const weightEditForm = exerciseItem.querySelector('.weight-edit-form');
-            
-            const newWeight = parseFloat(weightInput.value);
-            
-            // 데이터 유효성 검사
-            if (isNaN(newWeight) || newWeight < 0) {
-                alert('유효한 무게를 입력하세요.');
-                return;
-            }
-            
-            // 서버에 무게 업데이트 요청
-            const formData = new FormData();
-            formData.append('routine_type', routineType);
-            formData.append('exercise_name', exerciseName);
-            formData.append('weight', newWeight);
-            
-            fetch('/update-weight-during-workout', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // 성공 시 화면 업데이트
-                    weightDisplay.textContent = newWeight;
-                    exerciseItem.dataset.weight = newWeight;
-                    
-                    // 폼 숨기기 및 원래 표시 복원
-                    weightEditForm.style.display = 'none';
-                    weightDisplay.parentNode.style.display = 'inline-block';
-                    
-                    // 저장 성공 효과
-                    weightDisplay.parentNode.classList.add('bg-success');
-                    setTimeout(() => {
-                        weightDisplay.parentNode.classList.remove('bg-success');
-                        weightDisplay.parentNode.classList.add('bg-primary');
-                    }, 1000);
-                } else {
-                    alert('무게 업데이트 중 오류가 발생했습니다.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('무게 업데이트 중 오류가 발생했습니다.');
-            });
-        });
-    });
-});
+    }
+
+    // 타이머 설정 로드 함수
+    function loadTimerSettings() {
+      try {
+        // 루틴 타입에 따라 로컬 스토리지에서 설정 불러오기
+        const routineType = "{{ routine_type }}";
+        const storageKey = `${routineType}_timer_settings`;
+        const defaultSettings = {
+          successDuration: 60, // 성공 후 쉬는 시간 (초)
+          failDuration: 90, // 실패 후 쉬는 시간 (초)
+          sound: true, // 알림음 사용
+          vibration: true, // 진동 사용
+        };
+
+        const savedSettings = JSON.parse(localStorage.getItem(storageKey));
+        if (!savedSettings) {
+          return defaultSettings;
+        }
+
+        return {
+          successDuration:
+            savedSettings.success || defaultSettings.successDuration,
+          failDuration: savedSettings.fail || defaultSettings.failDuration,
+          sound:
+            savedSettings.sound !== undefined
+              ? savedSettings.sound
+              : defaultSettings.sound,
+          vibration:
+            savedSettings.vibration !== undefined
+              ? savedSettings.vibration
+              : defaultSettings.vibration,
+        };
+      } catch (error) {
+        console.error("타이머 설정 로드 오류:", error);
+        return {
+          successDuration: 60,
+          failDuration: 90,
+          sound: true,
+          vibration: true,
+        };
+      }
+    }
+  });
 </script>
 {% endblock %}

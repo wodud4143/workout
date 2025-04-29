@@ -1,250 +1,467 @@
-{% extends "base.html" %}
-
-{% block title %}운동 진행 추이{% endblock %}
-
-{% block content %}
-<div class="row">
-    <div class="col-12">
-        <h2 class="mb-4">운동 진행 추이</h2>
-        <p class="lead">종목별 무게 변화 추이를 확인할 수 있습니다.</p>
-    </div>
-</div>
-
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">운동 종목 선택</h5>
-                <select id="exerciseSelector" class="form-select">
-                    <option value="">운동 종목을 선택하세요</option>
-                    {% for exercise in exercises %}
-                    <option value="{{ exercise }}">{{ exercise }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+{% extends "base.html" %} {% block title %}운동 진행 추이{% endblock %} {% block
+header_title %}운동 진행 추이{% endblock %} {% block header_subtitle %}종목별
+무게 변화를 확인하세요{% endblock %} {% block content %}
+<!-- 운동 선택 카드 -->
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="row align-items-center">
+      <div class="col-auto">
+        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2">
+          <i class="fas fa-dumbbell"></i>
         </div>
+      </div>
+      <div class="col">
+        <h6 class="fw-bold mb-1">운동 종목 선택</h6>
+        <select id="exerciseSelector" class="form-select">
+          <option value="">운동 종목을 선택하세요</option>
+          {% for exercise in exercises %}
+          <option value="{{ exercise }}">{{ exercise }}</option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
+  </div>
 </div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h4 id="graphTitle">무게 변화 추이</h4>
+<!-- 상태 카드들 (초기에는 숨김) -->
+<div id="statsCards" style="display: none">
+  <div class="row g-3 mb-4">
+    <div class="col-6">
+      <div class="card h-100">
+        <div class="card-body p-3 text-center">
+          <div class="d-flex flex-column h-100 justify-content-between">
+            <div class="small text-muted mb-1">시작 무게</div>
+            <div>
+              <h3 id="startWeight" class="fw-bold text-primary mb-0">0kg</h3>
             </div>
-            <div class="card-body">
-                <div id="noDataMessage" class="text-center p-5">
-                    <p class="text-muted">운동 종목을 선택하면 무게 변화 추이가 표시됩니다.</p>
-                </div>
-                <canvas id="progressChart" style="display: none;"></canvas>
-            </div>
+          </div>
         </div>
+      </div>
     </div>
-</div>
-
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card" id="statsCard" style="display: none;">
-            <div class="card-header">
-                <h4>통계</h4>
+    <div class="col-6">
+      <div class="card h-100">
+        <div class="card-body p-3 text-center">
+          <div class="d-flex flex-column h-100 justify-content-between">
+            <div class="small text-muted mb-1">현재 무게</div>
+            <div>
+              <h3 id="currentWeight" class="fw-bold text-success mb-0">0kg</h3>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="card bg-primary text-white mb-3">
-                            <div class="card-body">
-                                <h5 class="card-title">시작 무게</h5>
-                                <p class="card-text h3" id="startWeight">0kg</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card bg-success text-white mb-3">
-                            <div class="card-body">
-                                <h5 class="card-title">현재 무게</h5>
-                                <p class="card-text h3" id="currentWeight">0kg</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card bg-info text-white mb-3">
-                            <div class="card-body">
-                                <h5 class="card-title">증가량</h5>
-                                <p class="card-text h3" id="weightIncrease">0kg</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card bg-warning text-white mb-3">
-                            <div class="card-body">
-                                <h5 class="card-title">증가율</h5>
-                                <p class="card-text h3" id="increasePercentage">0%</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
+      </div>
     </div>
+    <div class="col-6">
+      <div class="card h-100">
+        <div class="card-body p-3 text-center">
+          <div class="d-flex flex-column h-100 justify-content-between">
+            <div class="small text-muted mb-1">증가량</div>
+            <div>
+              <h3 id="weightIncrease" class="fw-bold text-info mb-0">0kg</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card h-100">
+        <div class="card-body p-3 text-center">
+          <div class="d-flex flex-column h-100 justify-content-between">
+            <div class="small text-muted mb-1">증가율</div>
+            <div>
+              <h3 id="increasePercentage" class="fw-bold text-warning mb-0">
+                0%
+              </h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
+<!-- 그래프 카드 -->
+<div class="card mb-4">
+  <div class="card-header p-3">
+    <h5 id="graphTitle" class="mb-0 fw-bold">무게 변화 추이</h5>
+  </div>
+  <div class="card-body p-0">
+    <div id="noDataMessage" class="text-center p-5">
+      <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+      <p class="text-muted">
+        운동 종목을 선택하면 무게 변화 추이가 표시됩니다.
+      </p>
+    </div>
+    <div
+      id="chartContainer"
+      style="display: none; height: 300px; padding: 15px"
+    >
+      <canvas id="progressChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- 표로 보기 (기본적으로 숨김) -->
+<div id="dataTableCard" class="card mb-5" style="display: none">
+  <div class="card-header p-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 fw-bold">상세 기록</h5>
+      <button
+        id="toggleTableBtn"
+        class="btn btn-sm btn-outline-primary rounded-pill"
+      >
+        <i class="fas fa-table me-1"></i> 표로 보기
+      </button>
+    </div>
+  </div>
+  <div id="dataTableContainer" style="display: none">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>날짜</th>
+            <th>무게</th>
+            <th>변화량</th>
+          </tr>
+        </thead>
+        <tbody id="dataTableBody">
+          <!-- 데이터가 여기에 동적으로 채워집니다 -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const exerciseSelector = document.getElementById('exerciseSelector');
-    const graphTitle = document.getElementById('graphTitle');
-    const progressChart = document.getElementById('progressChart');
-    const noDataMessage = document.getElementById('noDataMessage');
-    const statsCard = document.getElementById('statsCard');
-    
+  document.addEventListener("DOMContentLoaded", function () {
+    const exerciseSelector = document.getElementById("exerciseSelector");
+    const graphTitle = document.getElementById("graphTitle");
+    const progressChart = document.getElementById("progressChart");
+    const chartContainer = document.getElementById("chartContainer");
+    const noDataMessage = document.getElementById("noDataMessage");
+    const statsCards = document.getElementById("statsCards");
+    const dataTableCard = document.getElementById("dataTableCard");
+    const dataTableContainer = document.getElementById("dataTableContainer");
+    const toggleTableBtn = document.getElementById("toggleTableBtn");
+
     // 차트 객체 참조 저장용
     let chart = null;
-    
-    // 운동 종목 선택 이벤트
-    exerciseSelector.addEventListener('change', function() {
-        const selectedExercise = this.value;
-        
-        if (!selectedExercise) {
-            // 선택되지 않았을 때
-            noDataMessage.style.display = 'block';
-            progressChart.style.display = 'none';
-            statsCard.style.display = 'none';
-            return;
-        }
-        
-        // 선택된 운동 종목의 데이터 가져오기
-        fetchExerciseData(selectedExercise);
+
+    // 터치/클릭 진동 피드백 함수
+    function vibrate(duration) {
+      if ("vibrate" in navigator) {
+        navigator.vibrate(duration);
+      }
+    }
+
+    // 표 토글 버튼 클릭 이벤트
+    toggleTableBtn.addEventListener("click", function () {
+      vibrate(50);
+
+      const isVisible = dataTableContainer.style.display !== "none";
+
+      if (isVisible) {
+        // 표 숨기기
+        dataTableContainer.style.display = "none";
+        this.innerHTML = '<i class="fas fa-table me-1"></i> 표로 보기';
+      } else {
+        // 표 보이기
+        dataTableContainer.style.display = "block";
+        this.innerHTML = '<i class="fas fa-chart-line me-1"></i> 차트로 보기';
+      }
     });
-    
+
+    // 운동 종목 선택 이벤트
+    exerciseSelector.addEventListener("change", function () {
+      const selectedExercise = this.value;
+
+      // 간단한 터치 피드백
+      vibrate(50);
+
+      if (!selectedExercise) {
+        // 선택되지 않았을 때
+        noDataMessage.style.display = "block";
+        chartContainer.style.display = "none";
+        statsCards.style.display = "none";
+        dataTableCard.style.display = "none";
+        return;
+      }
+
+      // 로딩 표시
+      noDataMessage.innerHTML = `
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted">데이터를 불러오는 중...</p>
+        `;
+
+      // 선택된 운동 종목의 데이터 가져오기
+      fetchExerciseData(selectedExercise);
+    });
+
     // 운동 데이터 가져오기 함수
     function fetchExerciseData(exerciseName) {
-        fetch(`/exercise-progress/${encodeURIComponent(exerciseName)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.length === 0) {
-                    // 데이터가 없을 때
-                    noDataMessage.textContent = '이 운동에 대한 기록이 없습니다.';
-                    noDataMessage.style.display = 'block';
-                    progressChart.style.display = 'none';
-                    statsCard.style.display = 'none';
-                } else {
-                    // 데이터가 있을 때
-                    renderChart(exerciseName, data);
-                    updateStats(data);
-                    
-                    noDataMessage.style.display = 'none';
-                    progressChart.style.display = 'block';
-                    statsCard.style.display = 'block';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                noDataMessage.textContent = '데이터를 불러오는 중 오류가 발생했습니다.';
-                noDataMessage.style.display = 'block';
-                progressChart.style.display = 'none';
-                statsCard.style.display = 'none';
-            });
+      fetch(`/exercise-progress/${encodeURIComponent(exerciseName)}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.length === 0) {
+            // 데이터가 없을 때
+            noDataMessage.innerHTML = `
+                        <i class="fas fa-exclamation-circle fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">이 운동에 대한 기록이 없습니다.</p>
+                        <p class="small text-muted">다른 운동 종목을 선택하거나 운동을 기록해보세요.</p>
+                    `;
+            noDataMessage.style.display = "block";
+            chartContainer.style.display = "none";
+            statsCards.style.display = "none";
+            dataTableCard.style.display = "none";
+          } else {
+            // 데이터가 있을 때
+            renderChart(exerciseName, data);
+            updateStats(data);
+            renderDataTable(data);
+
+            noDataMessage.style.display = "none";
+            chartContainer.style.display = "block";
+            statsCards.style.display = "block";
+            dataTableCard.style.display = "block";
+
+            // 요소들이 나타날 때 애니메이션 효과
+            animateElements();
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          noDataMessage.innerHTML = `
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                    <p class="text-muted">데이터를 불러오는 중 오류가 발생했습니다.</p>
+                    <p class="small text-muted">다시 시도해주세요.</p>
+                `;
+          noDataMessage.style.display = "block";
+          chartContainer.style.display = "none";
+          statsCards.style.display = "none";
+          dataTableCard.style.display = "none";
+        });
     }
-    
+
+    // 요소 애니메이션 효과
+    function animateElements() {
+      const elements = [statsCards, chartContainer, dataTableCard];
+
+      elements.forEach((el, index) => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(20px)";
+
+        setTimeout(() => {
+          el.style.transition = "all 0.3s ease";
+          el.style.opacity = "1";
+          el.style.transform = "translateY(0)";
+        }, index * 150);
+      });
+    }
+
     // 차트 렌더링 함수
     function renderChart(exerciseName, data) {
-        // 차트 제목 업데이트
-        graphTitle.textContent = `${exerciseName} 무게 변화 추이`;
-        
-        // 차트 데이터 준비
-        const dates = data.map(item => item.date);
-        const weights = data.map(item => item.weight);
-        
-        // 이미 차트가 있으면 파괴
-        if (chart) {
-            chart.destroy();
-        }
-        
-        // 새 차트 생성
-        const ctx = progressChart.getContext('2d');
-        chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: dates,
-                datasets: [{
-                    label: '무게 (kg)',
-                    data: weights,
-                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                    borderColor: 'rgba(78, 115, 223, 1)',
-                    borderWidth: 3,
-                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    tension: 0.3
-                }]
+      // 차트 제목 업데이트
+      graphTitle.textContent = `${exerciseName} 무게 변화 추이`;
+
+      // 차트 데이터 준비
+      const dates = data.map((item) => formatDate(item.date));
+      const weights = data.map((item) => item.weight);
+
+      // 그라데이션 배경 생성
+      const ctx = progressChart.getContext("2d");
+      const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+      gradient.addColorStop(0, "rgba(58, 134, 255, 0.2)");
+      gradient.addColorStop(1, "rgba(58, 134, 255, 0)");
+
+      // 이미 차트가 있으면 파괴
+      if (chart) {
+        chart.destroy();
+      }
+
+      // 새 차트 생성
+      chart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: dates,
+          datasets: [
+            {
+              label: "무게 (kg)",
+              data: weights,
+              backgroundColor: gradient,
+              borderColor: "#3a86ff",
+              borderWidth: 3,
+              pointBackgroundColor: "#3a86ff",
+              pointBorderColor: "#fff",
+              pointBorderWidth: 2,
+              pointRadius: 5,
+              pointHoverRadius: 7,
+              tension: 0.3,
+              fill: true,
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                    padding: {
-                        left: 10,
-                        right: 25,
-                        top: 25,
-                        bottom: 0
-                    }
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: "index",
+            intersect: false,
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false,
+              },
+              ticks: {
+                maxRotation: 45,
+                minRotation: 45,
+                font: {
+                  size: 10,
                 },
-                scales: {
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: "rgba(0, 0, 0, 0.05)"
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return value + 'kg';
-                            }
-                        }
-                    }
+              },
+            },
+            y: {
+              beginAtZero: false,
+              grid: {
+                color: "rgba(0, 0, 0, 0.05)",
+              },
+              ticks: {
+                callback: function (value) {
+                  return value + "kg";
                 },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `무게: ${context.raw}kg`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-        
-        // 차트 크기 조정
-        progressChart.style.height = '400px';
+                font: {
+                  size: 10,
+                },
+              },
+            },
+          },
+          plugins: {
+            legend: {
+              display: false,
+            },
+            tooltip: {
+              backgroundColor: "rgba(0, 0, 0, 0.8)",
+              bodyFont: {
+                size: 13,
+              },
+              padding: 10,
+              displayColors: false,
+              callbacks: {
+                label: function (context) {
+                  return `무게: ${context.raw}kg`;
+                },
+              },
+            },
+          },
+        },
+      });
     }
-    
+
+    // 날짜 포맷팅 함수
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    }
+
     // 통계 업데이트 함수
     function updateStats(data) {
-        if (data.length === 0) return;
-        
-        // 데이터 정렬 (날짜 순)
-        data.sort((a, b) => new Date(a.date) - new Date(b.date));
-        
-        // 값 추출
-        const startWeight = data[0].weight;
-        const currentWeight = data[data.length - 1].weight;
-        const weightIncrease = currentWeight - startWeight;
-        const increasePercentage = startWeight > 0 ? (weightIncrease / startWeight) * 100 : 0;
-        
-        // DOM 업데이트
-        document.getElementById('startWeight').textContent = `${startWeight.toFixed(1)}kg`;
-        document.getElementById('currentWeight').textContent = `${currentWeight.toFixed(1)}kg`;
-        document.getElementById('weightIncrease').textContent = `${weightIncrease.toFixed(1)}kg`;
-        document.getElementById('increasePercentage').textContent = `${increasePercentage.toFixed(1)}%`;
+      if (data.length === 0) return;
+
+      // 데이터 정렬 (날짜 순)
+      data.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      // 값 추출
+      const startWeight = data[0].weight;
+      const currentWeight = data[data.length - 1].weight;
+      const weightIncrease = currentWeight - startWeight;
+      const increasePercentage =
+        startWeight > 0 ? (weightIncrease / startWeight) * 100 : 0;
+
+      // DOM 업데이트 (애니메이션 효과 적용)
+      animateValue("startWeight", 0, startWeight, 1000);
+      animateValue("currentWeight", 0, currentWeight, 1000);
+      animateValue("weightIncrease", 0, weightIncrease, 1000);
+      animateValue("increasePercentage", 0, increasePercentage, 1000);
     }
-});
+
+    // 값 애니메이션 함수
+    function animateValue(elementId, start, end, duration) {
+      const element = document.getElementById(elementId);
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const value = progress * (end - start) + start;
+
+        if (elementId === "increasePercentage") {
+          element.textContent = `${value.toFixed(1)}%`;
+        } else {
+          element.textContent = `${value.toFixed(1)}kg`;
+        }
+
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      };
+      window.requestAnimationFrame(step);
+    }
+
+    // 데이터 테이블 렌더링 함수
+    function renderDataTable(data) {
+      if (data.length === 0) return;
+
+      // 데이터 정렬 (날짜 순)
+      data.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      const tableBody = document.getElementById("dataTableBody");
+      tableBody.innerHTML = "";
+
+      // 이전 무게 값 추적
+      let prevWeight = null;
+
+      data.forEach((item, index) => {
+        const row = document.createElement("tr");
+
+        // 날짜 변환
+        const date = new Date(item.date);
+        const formattedDate = date.toLocaleDateString("ko-KR", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+
+        // 변화량 계산
+        let changeText = "-";
+        let changeClass = "";
+
+        if (index > 0) {
+          const change = item.weight - prevWeight;
+
+          if (change > 0) {
+            changeText = `+${change.toFixed(1)}kg`;
+            changeClass = "text-success fw-bold";
+          } else if (change < 0) {
+            changeText = `${change.toFixed(1)}kg`;
+            changeClass = "text-danger fw-bold";
+          } else {
+            changeText = "0kg";
+            changeClass = "text-muted";
+          }
+        }
+
+        row.innerHTML = `
+                <td>${formattedDate}</td>
+                <td class="fw-bold">${item.weight.toFixed(1)}kg</td>
+                <td class="${changeClass}">${changeText}</td>
+            `;
+
+        tableBody.appendChild(row);
+
+        // 이전 무게 업데이트
+        prevWeight = item.weight;
+      });
+    }
+  });
 </script>
 {% endblock %}

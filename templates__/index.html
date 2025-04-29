@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}운동 트래커 - 메인{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">오늘의 운동을 선택하세요</h2>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Push 루틴 카드 -->
+    <div class="col-md-4">
+        <div class="card routine-card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Push 루틴</h5>
+                <p class="card-text">가슴, 어깨, 삼두</p>
+                <a href="/routine/push" class="btn btn-primary">시작하기</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pull 루틴 카드 -->
+    <div class="col-md-4">
+        <div class="card routine-card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Pull 루틴</h5>
+                <p class="card-text">등, 이두</p>
+                <a href="/routine/pull" class="btn btn-primary">시작하기</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Leg 루틴 카드 -->
+    <div class="col-md-4">
+        <div class="card routine-card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Leg 루틴</h5>
+                <p class="card-text">하체</p>
+                <a href="/routine/leg" class="btn btn-primary">시작하기</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <h3>빠른 링크</h3>
+    </div>
+    
+    <div class="col-md-4 mt-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-history me-2"></i>운동 기록 보기
+                </h5>
+                <p class="card-text">과거 운동 기록을 날짜별로 확인할 수 있습니다.</p>
+                <a href="/history" class="btn btn-outline-primary">기록 보기</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mt-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-chart-line me-2"></i>진행 추이 보기
+                </h5>
+                <p class="card-text">운동 종목별 무게 변화 추이를 그래프로 확인할 수 있습니다.</p>
+                <a href="/progress-graph" class="btn btn-outline-primary">추이 보기</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mt-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-cog me-2"></i>운동 설정
+                </h5>
+                <p class="card-text">종목별 무게를 설정하고 관리할 수 있습니다.</p>
+                <a href="/settings" class="btn btn-outline-primary">설정하기</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

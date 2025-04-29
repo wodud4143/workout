@@ -1,326 +1,1478 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block title %}운동 설정{% endblock %} {% block
+header_title %}운동 설정{% endblock %} {% block header_subtitle %}루틴별 세부
+설정을 관리하세요{% endblock %} {% block content %}
+<!-- 세그먼트 컨트롤 (탭 대신 모바일 최적화) -->
+<div class="card mb-4">
+  <div class="card-body p-2">
+    <div class="btn-group w-100" role="group">
+      <input
+        type="radio"
+        class="btn-check"
+        name="routineSegment"
+        id="pushSegment"
+        autocomplete="off"
+        checked
+      />
+      <label class="btn btn-outline-primary rounded-0" for="pushSegment"
+        >Push</label
+      >
 
-{% block title %}운동 설정{% endblock %}
+      <input
+        type="radio"
+        class="btn-check"
+        name="routineSegment"
+        id="pullSegment"
+        autocomplete="off"
+      />
+      <label class="btn btn-outline-primary rounded-0" for="pullSegment"
+        >Pull</label
+      >
 
-{% block content %}
-<div class="row">
-    <div class="col-12">
-        <h2 class="mb-4">운동 설정</h2>
-        <p class="lead">각 운동 종목별 무게, 세트 수, 반복 횟수를 설정하세요.</p>
+      <input
+        type="radio"
+        class="btn-check"
+        name="routineSegment"
+        id="legSegment"
+        autocomplete="off"
+      />
+      <label class="btn btn-outline-primary rounded-0" for="legSegment"
+        >Leg</label
+      >
     </div>
+  </div>
 </div>
 
-<ul class="nav nav-tabs mb-4" id="routineTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="push-tab" data-bs-toggle="tab" data-bs-target="#push" type="button" role="tab" aria-controls="push" aria-selected="true">Push</button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="pull-tab" data-bs-toggle="tab" data-bs-target="#pull" type="button" role="tab" aria-controls="pull" aria-selected="false">Pull</button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="leg-tab" data-bs-toggle="tab" data-bs-target="#leg" type="button" role="tab" aria-controls="leg" aria-selected="false">Leg</button>
-    </li>
-</ul>
+<!-- 루틴 콘텐츠 영역 -->
+<div class="routine-content">
+  <!-- Push 루틴 설정 -->
+  <div id="pushContent" class="routine-panel">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0">
+        <i class="fas fa-hand-back-fist me-2 text-primary"></i>Push 루틴
+      </h5>
+      <div class="dropdown">
+        <button
+          class="btn btn-sm btn-outline-primary rounded-pill"
+          type="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <button
+              class="dropdown-item"
+              type="button"
+              data-bs-toggle="modal"
+              data-bs-target="#batchUpdateModal"
+              data-routine="push"
+            >
+              <i class="fas fa-exchange-alt me-1 text-primary"></i> 일괄 적용
+            </button>
+          </li>
+          <li>
+            <button
+              class="dropdown-item"
+              type="button"
+              data-bs-toggle="modal"
+              data-bs-target="#resetModal"
+              data-routine="push"
+            >
+              <i class="fas fa-undo me-1 text-warning"></i> 초기화
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
 
-<div class="tab-content" id="routineTabsContent">
-    <!-- Push 루틴 설정 -->
-    <div class="tab-pane fade show active" id="push" role="tabpanel" aria-labelledby="push-tab">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="card-title mb-0">Push 루틴 종목 설정</h3>
-                    
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#batchUpdateModal" data-routine="push">
-                            <i class="fas fa-exchange-alt me-1"></i> 일괄 적용
-                        </button>
-                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetModal" data-routine="push">
-                            <i class="fas fa-undo me-1"></i> 초기화
-                        </button>
-                    </div>
-                </div>
-                
-                <form action="/save-routine" method="post" id="pushForm">
-                    <input type="hidden" name="routine_type" value="push">
-                    
-                    {% for exercise in routines.push %}
-                    <div class="row mb-4 align-items-center">
-                        <div class="col-md-4">
-                            <h5>{{ exercise.name }}</h5>
-                        </div>
-                        <div class="col-md-8">
-                            <div class="row g-2">
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">무게</span>
-                                        <input type="number" name="weight_{{ exercise.name }}" value="{{ exercise.weight }}" class="form-control" min="0" step="0.5">
-                                        <span class="input-group-text">kg</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-3">
-                                    <div class="input-group">
-                                        <span class="input-group-text">세트</span>
-                                        <input type="number" name="sets_{{ exercise.name }}" value="{{ exercise.sets }}" class="form-control" min="1" max="10">
-                                        <span class="input-group-text">set</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-5">
-                                    <div class="input-group">
-                                        <span class="input-group-text">횟수</span>
-                                        <input type="text" name="reps_{{ exercise.name }}" value="{{ exercise.reps }}" class="form-control" placeholder="예: 8-10">
-                                        <span class="input-group-text">rep</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-success btn-lg">모든 설정 저장</button>
-                    </div>
-                </form>
+    <!-- 쉬는 시간 설정 카드 -->
+    <div class="card mb-4 timer-setting-card">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">
+          <i class="fas fa-stopwatch me-2 text-primary"></i>쉬는 시간 설정
+        </h6>
+
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label small text-muted">성공 후 쉬는 시간</label>
+            <div class="input-group">
+              <input
+                type="number"
+                id="push_success_timer"
+                name="push_success_timer"
+                value="60"
+                class="form-control timer-input"
+                min="15"
+                max="300"
+                step="5"
+              />
+              <span class="input-group-text">초</span>
             </div>
-        </div>
-    </div>
-    
-    <!-- Pull 루틴 설정 -->
-    <div class="tab-pane fade" id="pull" role="tabpanel" aria-labelledby="pull-tab">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="card-title mb-0">Pull 루틴 종목 설정</h3>
-                    
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#batchUpdateModal" data-routine="pull">
-                            <i class="fas fa-exchange-alt me-1"></i> 일괄 적용
-                        </button>
-                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetModal" data-routine="pull">
-                            <i class="fas fa-undo me-1"></i> 초기화
-                        </button>
-                    </div>
-                </div>
-                
-                <form action="/save-routine" method="post" id="pullForm">
-                    <input type="hidden" name="routine_type" value="pull">
-                    
-                    {% for exercise in routines.pull %}
-                    <div class="row mb-4 align-items-center">
-                        <div class="col-md-4">
-                            <h5>{{ exercise.name }}</h5>
-                        </div>
-                        <div class="col-md-8">
-                            <div class="row g-2">
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">무게</span>
-                                        <input type="number" name="weight_{{ exercise.name }}" value="{{ exercise.weight }}" class="form-control" min="0" step="0.5">
-                                        <span class="input-group-text">kg</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-3">
-                                    <div class="input-group">
-                                        <span class="input-group-text">세트</span>
-                                        <input type="number" name="sets_{{ exercise.name }}" value="{{ exercise.sets }}" class="form-control" min="1" max="10">
-                                        <span class="input-group-text">set</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-5">
-                                    <div class="input-group">
-                                        <span class="input-group-text">횟수</span>
-                                        <input type="text" name="reps_{{ exercise.name }}" value="{{ exercise.reps }}" class="form-control" placeholder="예: 8-10">
-                                        <span class="input-group-text">rep</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-success btn-lg">모든 설정 저장</button>
-                    </div>
-                </form>
+          </div>
+
+          <div class="col-6">
+            <label class="form-label small text-muted">실패 후 쉬는 시간</label>
+            <div class="input-group">
+              <input
+                type="number"
+                id="push_fail_timer"
+                name="push_fail_timer"
+                value="90"
+                class="form-control timer-input"
+                min="15"
+                max="300"
+                step="5"
+              />
+              <span class="input-group-text">초</span>
             </div>
+          </div>
         </div>
+
+        <div class="mt-3 d-flex align-items-center">
+          <div class="form-check form-switch">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="push_sound_enabled"
+              name="push_sound_enabled"
+              checked
+            />
+            <label class="form-check-label small" for="push_sound_enabled"
+              >알림음 사용</label
+            >
+          </div>
+          <div class="form-check form-switch ms-3">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="push_vibration_enabled"
+              name="push_vibration_enabled"
+              checked
+            />
+            <label class="form-check-label small" for="push_vibration_enabled"
+              >진동 사용</label
+            >
+          </div>
+        </div>
+      </div>
     </div>
-    
-    <!-- Leg 루틴 설정 -->
-    <div class="tab-pane fade" id="leg" role="tabpanel" aria-labelledby="leg-tab">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="card-title mb-0">Leg 루틴 종목 설정</h3>
-                    
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#batchUpdateModal" data-routine="leg">
-                            <i class="fas fa-exchange-alt me-1"></i> 일괄 적용
-                        </button>
-                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetModal" data-routine="leg">
-                            <i class="fas fa-undo me-1"></i> 초기화
-                        </button>
-                    </div>
+
+    <form action="/save-routine" method="post" id="pushForm">
+      <input type="hidden" name="routine_type" value="push" />
+      <input
+        type="hidden"
+        name="push_success_timer_value"
+        id="push_success_timer_value"
+        value="60"
+      />
+      <input
+        type="hidden"
+        name="push_fail_timer_value"
+        id="push_fail_timer_value"
+        value="90"
+      />
+      <input
+        type="hidden"
+        name="push_sound_enabled_value"
+        id="push_sound_enabled_value"
+        value="true"
+      />
+      <input
+        type="hidden"
+        name="push_vibration_enabled_value"
+        id="push_vibration_enabled_value"
+        value="true"
+      />
+
+      {% for exercise in routines.push %}
+      <div class="card mb-3 exercise-setting-card">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3">{{ exercise.name }}</h6>
+
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label small text-muted">무게 (kg)</label>
+              <div class="weight-spinner-container">
+                <div class="weight-spinner">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary weight-dec-btn"
+                  >
+                    <i class="fas fa-minus"></i>
+                  </button>
+                  <input
+                    type="number"
+                    name="weight_{{ exercise.name }}"
+                    value="{{ exercise.weight }}"
+                    class="form-control weight-input"
+                    min="0"
+                    step="0.5"
+                    readonly
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary weight-inc-btn"
+                  >
+                    <i class="fas fa-plus"></i>
+                  </button>
                 </div>
-                
-                <form action="/save-routine" method="post" id="legForm">
-                    <input type="hidden" name="routine_type" value="leg">
-                    
-                    {% for exercise in routines.leg %}
-                    <div class="row mb-4 align-items-center">
-                        <div class="col-md-4">
-                            <h5>{{ exercise.name }}</h5>
-                        </div>
-                        <div class="col-md-8">
-                            <div class="row g-2">
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text">무게</span>
-                                        <input type="number" name="weight_{{ exercise.name }}" value="{{ exercise.weight }}" class="form-control" min="0" step="0.5">
-                                        <span class="input-group-text">kg</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-3">
-                                    <div class="input-group">
-                                        <span class="input-group-text">세트</span>
-                                        <input type="number" name="sets_{{ exercise.name }}" value="{{ exercise.sets }}" class="form-control" min="1" max="10">
-                                        <span class="input-group-text">set</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-5">
-                                    <div class="input-group">
-                                        <span class="input-group-text">횟수</span>
-                                        <input type="text" name="reps_{{ exercise.name }}" value="{{ exercise.reps }}" class="form-control" placeholder="예: 8-10">
-                                        <span class="input-group-text">rep</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-success btn-lg">모든 설정 저장</button>
-                    </div>
-                </form>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-link text-primary weight-edit-toggle"
+                >
+                  <i class="fas fa-keyboard"></i> 직접 입력
+                </button>
+              </div>
             </div>
+
+            <div class="col-6">
+              <label class="form-label small text-muted">세트 수</label>
+              <div class="input-group">
+                <input
+                  type="number"
+                  name="sets_{{ exercise.name }}"
+                  value="{{ exercise.sets }}"
+                  class="form-control"
+                  min="1"
+                  max="10"
+                />
+                <span class="input-group-text">set</span>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <label class="form-label small text-muted">반복 횟수</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  name="reps_{{ exercise.name }}"
+                  value="{{ exercise.reps }}"
+                  class="form-control"
+                  placeholder="예: 8-10"
+                />
+                <span class="input-group-text">rep</span>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+      {% endfor %}
+
+      <div class="d-grid gap-2 mb-5">
+        <button type="submit" class="btn btn-primary btn-lg">
+          <i class="fas fa-save me-1"></i> 설정 저장
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Pull 루틴 설정 -->
+  <div id="pullContent" class="routine-panel" style="display: none">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0">
+        <i class="fas fa-hands-pulling me-2 text-success"></i>Pull 루틴
+      </h5>
+      <div class="dropdown">
+        <button
+          class="btn btn-sm btn-outline-success rounded-pill"
+          type="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <button
+              class="dropdown-item"
+              type="button"
+              data-bs-toggle="modal"
+              data-bs-target="#batchUpdateModal"
+              data-routine="pull"
+            >
+              <i class="fas fa-exchange-alt me-1 text-success"></i> 일괄 적용
+            </button>
+          </li>
+          <li>
+            <button
+              class="dropdown-item"
+              type="button"
+              data-bs-toggle="modal"
+              data-bs-target="#resetModal"
+              data-routine="pull"
+            >
+              <i class="fas fa-undo me-1 text-warning"></i> 초기화
+            </button>
+          </li>
+        </ul>
+      </div>
     </div>
+
+    <!-- 쉬는 시간 설정 카드 -->
+    <div class="card mb-4 timer-setting-card">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">
+          <i class="fas fa-stopwatch me-2 text-success"></i>쉬는 시간 설정
+        </h6>
+
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label small text-muted">성공 후 쉬는 시간</label>
+            <div class="input-group">
+              <input
+                type="number"
+                id="pull_success_timer"
+                name="pull_success_timer"
+                value="60"
+                class="form-control timer-input"
+                min="15"
+                max="300"
+                step="5"
+              />
+              <span class="input-group-text">초</span>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <label class="form-label small text-muted">실패 후 쉬는 시간</label>
+            <div class="input-group">
+              <input
+                type="number"
+                id="pull_fail_timer"
+                name="pull_fail_timer"
+                value="90"
+                class="form-control timer-input"
+                min="15"
+                max="300"
+                step="5"
+              />
+              <span class="input-group-text">초</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 d-flex align-items-center">
+          <div class="form-check form-switch">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="pull_sound_enabled"
+              name="pull_sound_enabled"
+              checked
+            />
+            <label class="form-check-label small" for="pull_sound_enabled"
+              >알림음 사용</label
+            >
+          </div>
+          <div class="form-check form-switch ms-3">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="pull_vibration_enabled"
+              name="pull_vibration_enabled"
+              checked
+            />
+            <label class="form-check-label small" for="pull_vibration_enabled"
+              >진동 사용</label
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form action="/save-routine" method="post" id="pullForm">
+      <input type="hidden" name="routine_type" value="pull" />
+      <input
+        type="hidden"
+        name="pull_success_timer_value"
+        id="pull_success_timer_value"
+        value="60"
+      />
+      <input
+        type="hidden"
+        name="pull_fail_timer_value"
+        id="pull_fail_timer_value"
+        value="90"
+      />
+      <input
+        type="hidden"
+        name="pull_sound_enabled_value"
+        id="pull_sound_enabled_value"
+        value="true"
+      />
+      <input
+        type="hidden"
+        name="pull_vibration_enabled_value"
+        id="pull_vibration_enabled_value"
+        value="true"
+      />
+
+      {% for exercise in routines.pull %}
+      <div class="card mb-3 exercise-setting-card">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3">{{ exercise.name }}</h6>
+
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label small text-muted">무게 (kg)</label>
+              <div class="weight-spinner-container">
+                <div class="weight-spinner">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary weight-dec-btn"
+                  >
+                    <i class="fas fa-minus"></i>
+                  </button>
+                  <input
+                    type="number"
+                    name="weight_{{ exercise.name }}"
+                    value="{{ exercise.weight }}"
+                    class="form-control weight-input"
+                    min="0"
+                    step="0.5"
+                    readonly
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary weight-inc-btn"
+                  >
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-link text-success weight-edit-toggle"
+                >
+                  <i class="fas fa-keyboard"></i> 직접 입력
+                </button>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <label class="form-label small text-muted">세트 수</label>
+              <div class="input-group">
+                <input
+                  type="number"
+                  name="sets_{{ exercise.name }}"
+                  value="{{ exercise.sets }}"
+                  class="form-control"
+                  min="1"
+                  max="10"
+                />
+                <span class="input-group-text">set</span>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <label class="form-label small text-muted">반복 횟수</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  name="reps_{{ exercise.name }}"
+                  value="{{ exercise.reps }}"
+                  class="form-control"
+                  placeholder="예: 8-10"
+                />
+                <span class="input-group-text">rep</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+      <div class="d-grid gap-2 mb-5">
+        <button type="submit" class="btn btn-success btn-lg">
+          <i class="fas fa-save me-1"></i> 설정 저장
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Leg 루틴 설정 -->
+  <div id="legContent" class="routine-panel" style="display: none">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0">
+        <i class="fas fa-person-walking me-2 text-warning"></i>Leg 루틴
+      </h5>
+      <div class="dropdown">
+        <button
+          class="btn btn-sm btn-outline-warning rounded-pill"
+          type="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <button
+              class="dropdown-item"
+              type="button"
+              data-bs-toggle="modal"
+              data-bs-target="#batchUpdateModal"
+              data-routine="leg"
+            >
+              <i class="fas fa-exchange-alt me-1 text-warning"></i> 일괄 적용
+            </button>
+          </li>
+          <li>
+            <button
+              class="dropdown-item"
+              type="button"
+              data-bs-toggle="modal"
+              data-bs-target="#resetModal"
+              data-routine="leg"
+            >
+              <i class="fas fa-undo me-1 text-warning"></i> 초기화
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 쉬는 시간 설정 카드 -->
+    <div class="card mb-4 timer-setting-card">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">
+          <i class="fas fa-stopwatch me-2 text-warning"></i>쉬는 시간 설정
+        </h6>
+
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label small text-muted">성공 후 쉬는 시간</label>
+            <div class="input-group">
+              <input
+                type="number"
+                id="leg_success_timer"
+                name="leg_success_timer"
+                value="60"
+                class="form-control timer-input"
+                min="15"
+                max="300"
+                step="5"
+              />
+              <span class="input-group-text">초</span>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <label class="form-label small text-muted">실패 후 쉬는 시간</label>
+            <div class="input-group">
+              <input
+                type="number"
+                id="leg_fail_timer"
+                name="leg_fail_timer"
+                value="90"
+                class="form-control timer-input"
+                min="15"
+                max="300"
+                step="5"
+              />
+              <span class="input-group-text">초</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 d-flex align-items-center">
+          <div class="form-check form-switch">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="leg_sound_enabled"
+              name="leg_sound_enabled"
+              checked
+            />
+            <label class="form-check-label small" for="leg_sound_enabled"
+              >알림음 사용</label
+            >
+          </div>
+          <div class="form-check form-switch ms-3">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="leg_vibration_enabled"
+              name="leg_vibration_enabled"
+              checked
+            />
+            <label class="form-check-label small" for="leg_vibration_enabled"
+              >진동 사용</label
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form action="/save-routine" method="post" id="legForm">
+      <input type="hidden" name="routine_type" value="leg" />
+      <input
+        type="hidden"
+        name="leg_success_timer_value"
+        id="leg_success_timer_value"
+        value="60"
+      />
+      <input
+        type="hidden"
+        name="leg_fail_timer_value"
+        id="leg_fail_timer_value"
+        value="90"
+      />
+      <input
+        type="hidden"
+        name="leg_sound_enabled_value"
+        id="leg_sound_enabled_value"
+        value="true"
+      />
+      <input
+        type="hidden"
+        name="leg_vibration_enabled_value"
+        id="leg_vibration_enabled_value"
+        value="true"
+      />
+
+      {% for exercise in routines.leg %}
+      <div class="card mb-3 exercise-setting-card">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3">{{ exercise.name }}</h6>
+
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label small text-muted">무게 (kg)</label>
+              <div class="weight-spinner-container">
+                <div class="weight-spinner">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary weight-dec-btn"
+                  >
+                    <i class="fas fa-minus"></i>
+                  </button>
+                  <input
+                    type="number"
+                    name="weight_{{ exercise.name }}"
+                    value="{{ exercise.weight }}"
+                    class="form-control weight-input"
+                    min="0"
+                    step="0.5"
+                    readonly
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary weight-inc-btn"
+                  >
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-link text-warning weight-edit-toggle"
+                >
+                  <i class="fas fa-keyboard"></i> 직접 입력
+                </button>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <label class="form-label small text-muted">세트 수</label>
+              <div class="input-group">
+                <input
+                  type="number"
+                  name="sets_{{ exercise.name }}"
+                  value="{{ exercise.sets }}"
+                  class="form-control"
+                  min="1"
+                  max="10"
+                />
+                <span class="input-group-text">set</span>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <label class="form-label small text-muted">반복 횟수</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  name="reps_{{ exercise.name }}"
+                  value="{{ exercise.reps }}"
+                  class="form-control"
+                  placeholder="예: 8-10"
+                />
+                <span class="input-group-text">rep</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+      <div class="d-grid gap-2 mb-5">
+        <button type="submit" class="btn btn-warning btn-lg text-white">
+          <i class="fas fa-save me-1"></i> 설정 저장
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- 일괄 적용 모달 -->
-<div class="modal fade" id="batchUpdateModal" tabindex="-1" aria-labelledby="batchUpdateModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="batchUpdateModalLabel">무게 일괄 적용</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<div
+  class="modal fade"
+  id="batchUpdateModal"
+  tabindex="-1"
+  aria-labelledby="batchUpdateModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="batchUpdateModalLabel">
+          무게 일괄 적용
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form action="/update-all-weights" method="post" id="batchUpdateForm">
+        <div class="modal-body">
+          <input type="hidden" name="routine_type" id="batchRoutineType" />
+
+          <div class="mb-3">
+            <label for="weight" class="form-label">모든 운동 무게 설정</label>
+            <div class="input-group">
+              <input
+                type="number"
+                class="form-control"
+                id="weight"
+                name="weight"
+                value="0"
+                min="0"
+                step="0.5"
+              />
+              <span class="input-group-text">kg</span>
             </div>
-            <form action="/update-all-weights" method="post" id="batchUpdateForm">
-                <div class="modal-body">
-                    <input type="hidden" name="routine_type" id="batchRoutineType">
-                    
-                    <div class="mb-3">
-                        <label for="weight" class="form-label">모든 운동 무게 (kg)</label>
-                        <div class="input-group">
-                            <input type="number" class="form-control" id="weight" name="weight" value="0" min="0" step="0.5">
-                            <span class="input-group-text">kg</span>
-                        </div>
-                        <div class="form-text">입력한 무게가 선택한.루틴의 모든 운동에 적용됩니다.</div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <button type="submit" class="btn btn-primary">일괄 적용</button>
-                </div>
-            </form>
+            <div class="form-text">
+              입력한 무게가 선택한 루틴의 모든 운동에 적용됩니다.
+            </div>
+          </div>
         </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            data-bs-dismiss="modal"
+          >
+            취소
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-check me-1"></i> 적용하기
+          </button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
 
 <!-- 초기화 모달 -->
-<div class="modal fade" id="resetModal" tabindex="-1" aria-labelledby="resetModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="resetModalLabel">초기화 옵션</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="resetRoutineType">
-                
-                <div class="d-grid gap-2">
-                    <button type="button" class="btn btn-warning" id="resetWeightsBtn">
-                        <i class="fas fa-weight-hanging me-2"></i>무게만 초기화 (0kg)
-                    </button>
-                    <button type="button" class="btn btn-danger" id="resetRoutineBtn">
-                        <i class="fas fa-redo-alt me-2"></i>세트 수와 반복 횟수 초기화 (기본값)
-                    </button>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-            </div>
+<div
+  class="modal fade"
+  id="resetModal"
+  tabindex="-1"
+  aria-labelledby="resetModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="resetModalLabel">초기화 옵션</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="resetRoutineType" />
+
+        <div class="d-grid gap-3">
+          <button
+            type="button"
+            class="btn btn-outline-warning"
+            id="resetWeightsBtn"
+          >
+            <i class="fas fa-weight-hanging me-2"></i>무게만 초기화 (0kg)
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-danger"
+            id="resetRoutineBtn"
+          >
+            <i class="fas fa-redo-alt me-2"></i>세트 수와 반복 횟수 초기화
+          </button>
         </div>
+        <div class="alert alert-warning mt-3 mb-0 small">
+          <i class="fas fa-exclamation-triangle me-1"></i>
+          초기화 작업은 되돌릴 수 없습니다.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          data-bs-dismiss="modal"
+        >
+          취소
+        </button>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- 무게만 초기화 폼 (숨김) -->
-<form id="resetWeightsForm" action="/reset-weights" method="post" style="display: none;">
-    <input type="hidden" name="routine_type" id="resetWeightsRoutineType">
+<form
+  id="resetWeightsForm"
+  action="/reset-weights"
+  method="post"
+  style="display: none"
+>
+  <input type="hidden" name="routine_type" id="resetWeightsRoutineType" />
 </form>
 
 <!-- 루틴 초기화 폼 (숨김) -->
-<form id="resetRoutineForm" action="/reset-routine" method="post" style="display: none;">
-    <input type="hidden" name="routine_type" id="resetRoutineRoutineType">
+<form
+  id="resetRoutineForm"
+  action="/reset-routine"
+  method="post"
+  style="display: none"
+>
+  <input type="hidden" name="routine_type" id="resetRoutineRoutineType" />
 </form>
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener("DOMContentLoaded", function () {
+    // 진동 함수
+    function vibrate(duration) {
+      if ("vibrate" in navigator) {
+        navigator.vibrate(duration);
+      }
+    }
+
+    // 세그먼트 컨트롤 (탭 대체)
+    const segments = {
+      push: {
+        segment: document.getElementById("pushSegment"),
+        content: document.getElementById("pushContent"),
+      },
+      pull: {
+        segment: document.getElementById("pullSegment"),
+        content: document.getElementById("pullContent"),
+      },
+      leg: {
+        segment: document.getElementById("legSegment"),
+        content: document.getElementById("legContent"),
+      },
+    };
+
+    // 세그먼트 변경 함수
+    function changeSegment(routineType) {
+      // 모든 패널 숨기기
+      for (const key in segments) {
+        segments[key].content.style.display = "none";
+      }
+
+      // 선택한 패널 보이기
+      segments[routineType].content.style.display = "block";
+
+      // 애니메이션 효과
+      segments[routineType].content.style.opacity = "0";
+      segments[routineType].content.style.transform = "translateX(10px)";
+
+      setTimeout(() => {
+        segments[routineType].content.style.transition = "all 0.3s ease";
+        segments[routineType].content.style.opacity = "1";
+        segments[routineType].content.style.transform = "translateX(0)";
+      }, 50);
+    }
+
+    // 세그먼트 이벤트 리스너
+    segments.push.segment.addEventListener("change", function () {
+      if (this.checked) {
+        changeSegment("push");
+        vibrate(50);
+      }
+    });
+
+    segments.pull.segment.addEventListener("change", function () {
+      if (this.checked) {
+        changeSegment("pull");
+        vibrate(50);
+      }
+    });
+
+    segments.leg.segment.addEventListener("change", function () {
+      if (this.checked) {
+        changeSegment("leg");
+        vibrate(50);
+      }
+    });
+
+    // 초기 세그먼트 설정
+    segments.push.segment.checked = true;
+    changeSegment("push");
+
     // 모달 관련 처리
-    const batchUpdateModal = document.getElementById('batchUpdateModal');
-    const resetModal = document.getElementById('resetModal');
-    
+    const batchUpdateModal = document.getElementById("batchUpdateModal");
+    const resetModal = document.getElementById("resetModal");
+
     // 일괄 적용 모달
-    batchUpdateModal.addEventListener('show.bs.modal', function(event) {
-        const button = event.relatedTarget;
-        const routineType = button.getAttribute('data-routine');
-        document.getElementById('batchRoutineType').value = routineType;
-        document.getElementById('batchUpdateModalLabel').textContent = `${routineType.charAt(0).toUpperCase() + routineType.slice(1)} 루틴 무게 일괄 적용`;
+    batchUpdateModal.addEventListener("show.bs.modal", function (event) {
+      const button = event.relatedTarget;
+      const routineType = button.getAttribute("data-routine");
+      document.getElementById("batchRoutineType").value = routineType;
+      document.getElementById("batchUpdateModalLabel").textContent = `${
+        routineType.charAt(0).toUpperCase() + routineType.slice(1)
+      } 루틴 무게 일괄 적용`;
+
+      vibrate(50);
     });
-    
+
     // 초기화 모달
-    resetModal.addEventListener('show.bs.modal', function(event) {
-        const button = event.relatedTarget;
-        const routineType = button.getAttribute('data-routine');
-        document.getElementById('resetRoutineType').value = routineType;
-        document.getElementById('resetModalLabel').textContent = `${routineType.charAt(0).toUpperCase() + routineType.slice(1)} 루틴 초기화`;
+    resetModal.addEventListener("show.bs.modal", function (event) {
+      const button = event.relatedTarget;
+      const routineType = button.getAttribute("data-routine");
+      document.getElementById("resetRoutineType").value = routineType;
+      document.getElementById("resetModalLabel").textContent = `${
+        routineType.charAt(0).toUpperCase() + routineType.slice(1)
+      } 루틴 초기화`;
+
+      vibrate(50);
     });
-    
+
+    // 토스트 메시지 표시 함수
+    function showToast(message, type) {
+      // 기존 토스트가 있다면 제거
+      const existingToasts = document.querySelectorAll(".toast-container");
+      existingToasts.forEach((toast) => toast.remove());
+
+      // 새 토스트 생성
+      const toastContainer = document.createElement("div");
+      toastContainer.className =
+        "toast-container position-fixed bottom-0 start-50 translate-middle-x p-3";
+      toastContainer.style.zIndex = "1100";
+
+      const toastHTML = `
+            <div class="toast show bg-${type} text-white" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-body d-flex align-items-center">
+                    <i class="fas fa-${
+                      type === "success" ? "check-circle" : "exclamation-circle"
+                    } me-2"></i>
+                    ${message}
+                </div>
+            </div>
+        `;
+
+      toastContainer.innerHTML = toastHTML;
+      document.body.appendChild(toastContainer);
+
+      // 3초 후 토스트 제거
+      setTimeout(() => {
+        toastContainer.remove();
+      }, 3000);
+    }
+
     // 무게만 초기화 버튼
-    document.getElementById('resetWeightsBtn').addEventListener('click', function() {
-        if (confirm('정말로 모든 무게를 0kg으로 초기화하시겠습니까?')) {
-            const routineType = document.getElementById('resetRoutineType').value;
-            document.getElementById('resetWeightsRoutineType').value = routineType;
-            document.getElementById('resetWeightsForm').submit();
+    document
+      .getElementById("resetWeightsBtn")
+      .addEventListener("click", function () {
+        vibrate([50, 50, 100]);
+
+        if (confirm("정말로 모든 무게를 0kg으로 초기화하시겠습니까?")) {
+          const routineType = document.getElementById("resetRoutineType").value;
+          document.getElementById("resetWeightsRoutineType").value =
+            routineType;
+
+          // 버튼 로딩 상태
+          this.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-2"></span>초기화 중...';
+          this.disabled = true;
+
+          // 폼 제출
+          document.getElementById("resetWeightsForm").submit();
         }
-    });
-    
+      });
+
     // 루틴 초기화 버튼
-    document.getElementById('resetRoutineBtn').addEventListener('click', function() {
-        if (confirm('정말로 세트 수와 반복 횟수를 기본값으로 초기화하시겠습니까? (현재 무게는 유지됩니다)')) {
-            const routineType = document.getElementById('resetRoutineType').value;
-            document.getElementById('resetRoutineRoutineType').value = routineType;
-            document.getElementById('resetRoutineForm').submit();
+    document
+      .getElementById("resetRoutineBtn")
+      .addEventListener("click", function () {
+        vibrate([50, 50, 100]);
+
+        if (
+          confirm(
+            "정말로 세트 수와 반복 횟수를 기본값으로 초기화하시겠습니까? (현재 무게는 유지됩니다)"
+          )
+        ) {
+          const routineType = document.getElementById("resetRoutineType").value;
+          document.getElementById("resetRoutineRoutineType").value =
+            routineType;
+
+          // 버튼 로딩 상태
+          this.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-2"></span>초기화 중...';
+          this.disabled = true;
+
+          // 폼 제출
+          document.getElementById("resetRoutineForm").submit();
         }
+      });
+
+    // 무게 스피너 기능 (모든 루틴에 적용)
+    setupWeightSpinner();
+
+    function setupWeightSpinner() {
+      // 모든 무게 감소 버튼
+      document.querySelectorAll(".weight-dec-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          const input = this.nextElementSibling;
+          let value = parseFloat(input.value);
+
+          if (value >= 0.5) {
+            value -= 0.5;
+            input.value = value.toFixed(1);
+            vibrate(30);
+          }
+        });
+      });
+
+      // 모든 무게 증가 버튼
+      document.querySelectorAll(".weight-inc-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          const input = this.previousElementSibling;
+          let value = parseFloat(input.value);
+
+          value += 0.5;
+          input.value = value.toFixed(1);
+          vibrate(30);
+        });
+      });
+
+      // 직접 입력 모드
+      document.querySelectorAll(".weight-edit-toggle").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          const container = this.closest(".weight-spinner-container");
+          const input = container.querySelector(".weight-input");
+
+          // 현재 상태 확인
+          if (input.readOnly) {
+            // 직접 입력 모드로 전환
+            input.readOnly = false;
+            input.style.backgroundColor = "#fff";
+            input.focus();
+            this.innerHTML = '<i class="fas fa-check"></i> 완료';
+            vibrate(50);
+          } else {
+            // 스피너 모드로 복귀
+            input.readOnly = true;
+            input.style.backgroundColor = "";
+            this.innerHTML = '<i class="fas fa-keyboard"></i> 직접 입력';
+
+            // 입력값 유효성 검사
+            let value = parseFloat(input.value);
+            if (isNaN(value) || value < 0) {
+              value = 0;
+            }
+            input.value = value.toFixed(1);
+
+            vibrate(50);
+          }
+        });
+      });
+    }
+
+    // 타이머 값 설정 처리
+    setupTimerSettings();
+
+    function setupTimerSettings() {
+      // 루틴별 타이머 설정 요소
+      const timerSettings = {
+        push: {
+          success: document.getElementById("push_success_timer"),
+          fail: document.getElementById("push_fail_timer"),
+          sound: document.getElementById("push_sound_enabled"),
+          vibration: document.getElementById("push_vibration_enabled"),
+          successValue: document.getElementById("push_success_timer_value"),
+          failValue: document.getElementById("push_fail_timer_value"),
+          soundValue: document.getElementById("push_sound_enabled_value"),
+          vibrationValue: document.getElementById(
+            "push_vibration_enabled_value"
+          ),
+        },
+        pull: {
+          success: document.getElementById("pull_success_timer"),
+          fail: document.getElementById("pull_fail_timer"),
+          sound: document.getElementById("pull_sound_enabled"),
+          vibration: document.getElementById("pull_vibration_enabled"),
+          successValue: document.getElementById("pull_success_timer_value"),
+          failValue: document.getElementById("pull_fail_timer_value"),
+          soundValue: document.getElementById("pull_sound_enabled_value"),
+          vibrationValue: document.getElementById(
+            "pull_vibration_enabled_value"
+          ),
+        },
+        leg: {
+          success: document.getElementById("leg_success_timer"),
+          fail: document.getElementById("leg_fail_timer"),
+          sound: document.getElementById("leg_sound_enabled"),
+          vibration: document.getElementById("leg_vibration_enabled"),
+          successValue: document.getElementById("leg_success_timer_value"),
+          failValue: document.getElementById("leg_fail_timer_value"),
+          soundValue: document.getElementById("leg_sound_enabled_value"),
+          vibrationValue: document.getElementById(
+            "leg_vibration_enabled_value"
+          ),
+        },
+      };
+
+      // 각 루틴의 타이머 설정 이벤트 핸들러 설정
+      for (const routineType in timerSettings) {
+        const settings = timerSettings[routineType];
+
+        // 성공 타이머 변경
+        if (settings.success) {
+          settings.success.addEventListener("change", function () {
+            settings.successValue.value = this.value;
+            vibrate(30);
+            saveTimerSettingsToLocalStorage(routineType);
+          });
+        }
+
+        // 실패 타이머 변경
+        if (settings.fail) {
+          settings.fail.addEventListener("change", function () {
+            settings.failValue.value = this.value;
+            vibrate(30);
+            saveTimerSettingsToLocalStorage(routineType);
+          });
+        }
+
+        // 알림음 설정 변경
+        if (settings.sound) {
+          settings.sound.addEventListener("change", function () {
+            settings.soundValue.value = this.checked ? "true" : "false";
+            vibrate(30);
+            saveTimerSettingsToLocalStorage(routineType);
+          });
+        }
+
+        // 진동 설정 변경
+        if (settings.vibration) {
+          settings.vibration.addEventListener("change", function () {
+            settings.vibrationValue.value = this.checked ? "true" : "false";
+            vibrate(30);
+            saveTimerSettingsToLocalStorage(routineType);
+          });
+        }
+      }
+
+      // 로컬 스토리지에서 설정 불러오기
+      loadTimerSettingsFromLocalStorage();
+    }
+
+    // 로컬 스토리지에서 타이머 설정 불러오기
+    function loadTimerSettingsFromLocalStorage() {
+      try {
+        // Push 루틴 설정
+        const pushSettings =
+          JSON.parse(localStorage.getItem("push_timer_settings")) || {};
+        if (pushSettings.success)
+          document.getElementById("push_success_timer").value =
+            pushSettings.success;
+        if (pushSettings.fail)
+          document.getElementById("push_fail_timer").value = pushSettings.fail;
+        if (pushSettings.sound !== undefined)
+          document.getElementById("push_sound_enabled").checked =
+            pushSettings.sound;
+        if (pushSettings.vibration !== undefined)
+          document.getElementById("push_vibration_enabled").checked =
+            pushSettings.vibration;
+
+        document.getElementById("push_success_timer_value").value =
+          document.getElementById("push_success_timer").value;
+        document.getElementById("push_fail_timer_value").value =
+          document.getElementById("push_fail_timer").value;
+        document.getElementById("push_sound_enabled_value").value =
+          document.getElementById("push_sound_enabled").checked
+            ? "true"
+            : "false";
+        document.getElementById("push_vibration_enabled_value").value =
+          document.getElementById("push_vibration_enabled").checked
+            ? "true"
+            : "false";
+
+        // Pull 루틴 설정
+        const pullSettings =
+          JSON.parse(localStorage.getItem("pull_timer_settings")) || {};
+        if (pullSettings.success)
+          document.getElementById("pull_success_timer").value =
+            pullSettings.success;
+        if (pullSettings.fail)
+          document.getElementById("pull_fail_timer").value = pullSettings.fail;
+        if (pullSettings.sound !== undefined)
+          document.getElementById("pull_sound_enabled").checked =
+            pullSettings.sound;
+        if (pullSettings.vibration !== undefined)
+          document.getElementById("pull_vibration_enabled").checked =
+            pullSettings.vibration;
+
+        document.getElementById("pull_success_timer_value").value =
+          document.getElementById("pull_success_timer").value;
+        document.getElementById("pull_fail_timer_value").value =
+          document.getElementById("pull_fail_timer").value;
+        document.getElementById("pull_sound_enabled_value").value =
+          document.getElementById("pull_sound_enabled").checked
+            ? "true"
+            : "false";
+        document.getElementById("pull_vibration_enabled_value").value =
+          document.getElementById("pull_vibration_enabled").checked
+            ? "true"
+            : "false";
+
+        // Leg 루틴 설정
+        const legSettings =
+          JSON.parse(localStorage.getItem("leg_timer_settings")) || {};
+        if (legSettings.success)
+          document.getElementById("leg_success_timer").value =
+            legSettings.success;
+        if (legSettings.fail)
+          document.getElementById("leg_fail_timer").value = legSettings.fail;
+        if (legSettings.sound !== undefined)
+          document.getElementById("leg_sound_enabled").checked =
+            legSettings.sound;
+        if (legSettings.vibration !== undefined)
+          document.getElementById("leg_vibration_enabled").checked =
+            legSettings.vibration;
+
+        document.getElementById("leg_success_timer_value").value =
+          document.getElementById("leg_success_timer").value;
+        document.getElementById("leg_fail_timer_value").value =
+          document.getElementById("leg_fail_timer").value;
+        document.getElementById("leg_sound_enabled_value").value =
+          document.getElementById("leg_sound_enabled").checked
+            ? "true"
+            : "false";
+        document.getElementById("leg_vibration_enabled_value").value =
+          document.getElementById("leg_vibration_enabled").checked
+            ? "true"
+            : "false";
+      } catch (error) {
+        console.error("타이머 설정 불러오기 오류:", error);
+      }
+    }
+
+    // 로컬 스토리지에 타이머 설정 저장
+    function saveTimerSettingsToLocalStorage(routineType) {
+      try {
+        const settings = {};
+
+        if (routineType === "push") {
+          settings.success = parseInt(
+            document.getElementById("push_success_timer").value
+          );
+          settings.fail = parseInt(
+            document.getElementById("push_fail_timer").value
+          );
+          settings.sound =
+            document.getElementById("push_sound_enabled").checked;
+          settings.vibration = document.getElementById(
+            "push_vibration_enabled"
+          ).checked;
+          localStorage.setItem("push_timer_settings", JSON.stringify(settings));
+        } else if (routineType === "pull") {
+          settings.success = parseInt(
+            document.getElementById("pull_success_timer").value
+          );
+          settings.fail = parseInt(
+            document.getElementById("pull_fail_timer").value
+          );
+          settings.sound =
+            document.getElementById("pull_sound_enabled").checked;
+          settings.vibration = document.getElementById(
+            "pull_vibration_enabled"
+          ).checked;
+          localStorage.setItem("pull_timer_settings", JSON.stringify(settings));
+        } else if (routineType === "leg") {
+          settings.success = parseInt(
+            document.getElementById("leg_success_timer").value
+          );
+          settings.fail = parseInt(
+            document.getElementById("leg_fail_timer").value
+          );
+          settings.sound = document.getElementById("leg_sound_enabled").checked;
+          settings.vibration = document.getElementById(
+            "leg_vibration_enabled"
+          ).checked;
+          localStorage.setItem("leg_timer_settings", JSON.stringify(settings));
+        }
+      } catch (error) {
+        console.error("타이머 설정 저장 오류:", error);
+      }
+    }
+
+    // 폼 제출 시 로딩 상태 표시 및 타이머 설정 저장
+    const forms = document.querySelectorAll("form");
+    forms.forEach((form) => {
+      form.addEventListener("submit", function () {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const routineType = this.querySelector(
+          'input[name="routine_type"]'
+        ).value;
+
+        // 타이머 설정 저장
+        saveTimerSettingsToLocalStorage(routineType);
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-2"></span>저장 중...';
+          vibrate(100);
+        }
+      });
     });
-});
+
+    // URL에서 쿼리 파라미터 확인하여 성공 메시지 표시
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("success")) {
+      showToast("설정이 성공적으로 저장되었습니다.", "success");
+    }
+  });
 </script>
+{% endblock %} {% block extra_css %}
+<style>
+  /* 세팅 페이지 스타일 */
+  .exercise-setting-card {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+  }
+
+  .exercise-setting-card:active {
+    transform: scale(0.98);
+  }
+
+  /* 세그먼트 컨트롤 스타일 */
+  .btn-check:checked + .btn-outline-primary {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 500;
+  }
+
+  .routine-panel {
+    opacity: 0;
+    transform: translateX(10px);
+    transition: all 0.3s ease;
+  }
+
+  /* 드롭다운 스타일 */
+  .dropdown-menu {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 8px;
+  }
+
+  .dropdown-item {
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 4px;
+  }
+
+  .dropdown-item:last-child {
+    margin-bottom: 0;
+  }
+
+  /* 모달 스타일 */
+  .modal-content {
+    border: none;
+  }
+
+  /* 토스트 스타일 */
+  .toast {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  /* 입력 필드 스타일 */
+  .form-control {
+    border-radius: 10px 0 0 10px;
+    border: 1px solid #dee2e6;
+    padding: 12px 15px;
+  }
+
+  .input-group-text {
+    background-color: #f8f9fa;
+    border-radius: 0 10px 10px 0;
+    border: 1px solid #dee2e6;
+    border-left: none;
+  }
+
+  /* 무게 스피너 스타일 */
+  .weight-spinner-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .weight-spinner {
+    display: flex;
+    align-items: center;
+  }
+
+  .weight-spinner .form-control {
+    border-radius: 0;
+    text-align: center;
+    font-weight: bold;
+    height: 48px;
+    padding: 0;
+  }
+
+  .weight-spinner .btn {
+    height: 48px;
+    width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .weight-spinner .weight-dec-btn {
+    border-radius: 10px 0 0 10px;
+  }
+
+  .weight-spinner .weight-inc-btn {
+    border-radius: 0 10px 10px 0;
+  }
+
+  .weight-edit-toggle {
+    align-self: flex-end;
+    margin-top: 5px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+
+  /* 타이머 설정 카드 스타일 */
+  .timer-setting-card {
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .timer-input::-webkit-inner-spin-button,
+  .timer-input::-webkit-outer-spin-button {
+    opacity: 1;
+  }
+</style>
 {% endblock %}

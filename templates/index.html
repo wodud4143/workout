@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+  <section class="routine-list">
+    {% for key in routines.keys() %}
+      <a class="routine-card" href="{{ url_for('routine', name=key) }}">
+        {{ key|capitalize }} 루틴
+      </a>
+    {% endfor %}
+  </section>
+{% endblock %}

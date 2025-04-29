@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>{{ name|capitalize }} 루틴</h2>
+  <section class="exercises">
+    {% for ex in exercises %}
+      <div class="exercise"
+           data-sets="{{ ex.sets }}"
+           data-weight="{{ ex.weight }}">
+        <h3>
+          {{ ex.name }} ({{ ex.reps }})
+          {% if ex.weight != '' %}
+            — 무게: {{ ex.weight }}kg
+          {% else %}
+            — 무게: 설정 필요
+          {% endif %}
+        </h3>
+        <div class="circles">
+          {% for i in range(ex.sets) %}
+            <span class="circle" data-clicks="0"></span>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </section>
+  <button id="complete-btn">운동완료</button>
+  <div id="timer">
+    <span id="timer-label"></span>
+    <span id="timer-count">00:00</span>
+    <audio id="alarm" src="{{ url_for('static', filename='audio/alarm.mp3') }}"></audio>
+  </div>
+{% endblock %}

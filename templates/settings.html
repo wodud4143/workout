@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>무게 설정</h2>
+
+  <form method="post" class="bulk-form">
+    <label>일괄 적용 무게(kg):</label>
+    <input type="text" name="bulk_weight" placeholder="예: 20">
+    <button type="submit" name="action" value="apply_all">일괄 적용</button>
+    <button type="submit" name="action" value="reset_all">초기화</button>
+  </form>
+
+  <form method="post" class="individual-form">
+    <table class="settings-table">
+      <thead>
+        <tr><th>종목</th><th>무게 (kg)</th></tr>
+      </thead>
+      <tbody>
+        {% for ex in exercises %}
+          <tr>
+            <td>{{ ex }}</td>
+            <td>
+              <input type="text" name="{{ ex }}" value="{{ weight_map.get(ex, '') }}">
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button type="submit" name="action" value="save_individual">저장</button>
+  </form>
+{% endblock %}

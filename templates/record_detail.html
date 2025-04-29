@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>{{ record.date }} — {{ record.routine|capitalize }} 루틴 결과</h2>
+  <table class="results">
+    <thead>
+      <tr>
+        <th>종목</th>
+        <th>총 세트</th>
+        <th>성공</th>
+        <th>실패</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in details %}
+        <tr>
+          <td>{{ d.exercise }}</td>
+          <td>{{ d.total_sets }}</td>
+          <td>{{ d.success }}</td>
+          <td>{{ d.fail }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

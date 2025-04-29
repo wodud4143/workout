@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>운동 루틴 앱</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header>
+    <h1><a href="{{ url_for('index') }}">내 운동 루틴</a></h1>
+    <nav>
+      <a href="{{ url_for('records') }}">내 운동 기록</a>
+      <a href="{{ url_for('settings') }}">설정</a>
+    </nav>
+  </header>
+  <main>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for msg in messages %}
+            <li>{{ msg }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <script src="{{ url_for('static', filename='js/workout.js') }}"></script>
+</body>
+</html>

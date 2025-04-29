@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>{{ year }}년 {{ month }}월 운동 기록</h2>
+  <table class="calendar">
+    <thead>
+      <tr>
+        {% for d in ['월','화','수','목','금','토','일'] %}
+          <th>{{ d }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for week in cal %}
+        <tr>
+          {% for day in week %}
+            <td>
+              {% if day %}
+                <div class="day-number">{{ day }}</div>
+                {% if records.get(day) %}
+                  <ul class="record-list">
+                    {% for routine in records[day] %}
+                      <li>
+                        <a href="{{ url_for('trend', routine=routine) }}">
+                          {{ routine|capitalize }} 루틴 추이
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              {% endif %}
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>{{ routine|capitalize }} 루틴 — 무게 상승 추이</h2>
+  <div class="charts">
+    {% for exercise, data in trend_data.items() %}
+      <div class="chart-container">
+        <h3>{{ exercise }}</h3>
+        <canvas id="chart-{{ loop.index }}"></canvas>
+        <script>
+          const ctx{{ loop.index }} = document.getElementById('chart-{{ loop.index }}').getContext('2d');
+          new Chart(ctx{{ loop.index }}, {
+            type: 'line',
+            data: {
+              labels: {{ data|map(attribute='date')|list|tojson }},
+              datasets: [{
+                label: '{{ exercise }} 무게 (kg)',
+                data: {{ data|map(attribute='weight')|list|tojson }},
+                fill: false,
+                tension: 0.1
+              }]
+            },
+            options: {
+              scales: {
+                x: { title: { display: true, text: '날짜' } },
+                y: { title: { display: true, text: '무게 (kg)' } }
+              }
+            }
+          });
+        </script>
+      </div>
+    {% endfor %}
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}

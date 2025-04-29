@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}세션 상세 정보{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/history">운동 기록</a></li>
+                <li class="breadcrumb-item active" aria-current="page">세션 상세</li>
+            </ol>
+        </nav>
+        
+        <h2 class="mb-4">
+            {{ session.routine_type|capitalize }} 루틴
+            <small class="text-muted">{{ session.date.strftime('%Y년 %m월 %d일 %H:%M') if session.date is not string else session.date }}</small>
+        </h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>수행한 운동 목록</h4>
+            </div>
+            <div class="card-body">
+                {% if exercises|length == 0 %}
+                <p class="text-center text-muted">이 세션에 기록된 운동이 없습니다.</p>
+                {% else %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>운동 종목</th>
+                                <th>무게</th>
+                                <th>세트 수행</th>
+                                <th>성공/실패</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for name, exercise in exercises.items() %}
+                            <tr>
+                                <td>
+                                    <strong>{{ name }}</strong>
+                                </td>
+                                <td>{{ exercise.weight }}kg</td>
+                                <td>
+                                    {% for set in exercise.sets %}
+                                    {% if set.status == 'success' %}
+                                    <span class="badge bg-success" title="성공">{{ set.set_number }}</span>
+                                    {% elif set.status == 'fail' %}
+                                    <span class="badge bg-danger" title="실패">{{ set.set_number }}</span>
+                                    {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    <span class="text-success">성공: {{ exercise.success_count }}회</span><br>
+                                    <span class="text-danger">실패: {{ exercise.fail_count }}회</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-end">
+            <a href="/progress-graph" class="btn btn-primary">
+                <i class="fas fa-chart-line me-2"></i>진행 추이 보기
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

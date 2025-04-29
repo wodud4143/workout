@@ -1,30 +1,326 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}운동 설정{% endblock %}
+
 {% block content %}
-  <h2>무게 설정</h2>
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">운동 설정</h2>
+        <p class="lead">각 운동 종목별 무게, 세트 수, 반복 횟수를 설정하세요.</p>
+    </div>
+</div>
 
-  <form method="post" class="bulk-form">
-    <label>일괄 적용 무게(kg):</label>
-    <input type="text" name="bulk_weight" placeholder="예: 20">
-    <button type="submit" name="action" value="apply_all">일괄 적용</button>
-    <button type="submit" name="action" value="reset_all">초기화</button>
-  </form>
+<ul class="nav nav-tabs mb-4" id="routineTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="push-tab" data-bs-toggle="tab" data-bs-target="#push" type="button" role="tab" aria-controls="push" aria-selected="true">Push</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pull-tab" data-bs-toggle="tab" data-bs-target="#pull" type="button" role="tab" aria-controls="pull" aria-selected="false">Pull</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="leg-tab" data-bs-toggle="tab" data-bs-target="#leg" type="button" role="tab" aria-controls="leg" aria-selected="false">Leg</button>
+    </li>
+</ul>
 
-  <form method="post" class="individual-form">
-    <table class="settings-table">
-      <thead>
-        <tr><th>종목</th><th>무게 (kg)</th></tr>
-      </thead>
-      <tbody>
-        {% for ex in exercises %}
-          <tr>
-            <td>{{ ex }}</td>
-            <td>
-              <input type="text" name="{{ ex }}" value="{{ weight_map.get(ex, '') }}">
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <button type="submit" name="action" value="save_individual">저장</button>
-  </form>
+<div class="tab-content" id="routineTabsContent">
+    <!-- Push 루틴 설정 -->
+    <div class="tab-pane fade show active" id="push" role="tabpanel" aria-labelledby="push-tab">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="card-title mb-0">Push 루틴 종목 설정</h3>
+                    
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#batchUpdateModal" data-routine="push">
+                            <i class="fas fa-exchange-alt me-1"></i> 일괄 적용
+                        </button>
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetModal" data-routine="push">
+                            <i class="fas fa-undo me-1"></i> 초기화
+                        </button>
+                    </div>
+                </div>
+                
+                <form action="/save-routine" method="post" id="pushForm">
+                    <input type="hidden" name="routine_type" value="push">
+                    
+                    {% for exercise in routines.push %}
+                    <div class="row mb-4 align-items-center">
+                        <div class="col-md-4">
+                            <h5>{{ exercise.name }}</h5>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">무게</span>
+                                        <input type="number" name="weight_{{ exercise.name }}" value="{{ exercise.weight }}" class="form-control" min="0" step="0.5">
+                                        <span class="input-group-text">kg</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text">세트</span>
+                                        <input type="number" name="sets_{{ exercise.name }}" value="{{ exercise.sets }}" class="form-control" min="1" max="10">
+                                        <span class="input-group-text">set</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-5">
+                                    <div class="input-group">
+                                        <span class="input-group-text">횟수</span>
+                                        <input type="text" name="reps_{{ exercise.name }}" value="{{ exercise.reps }}" class="form-control" placeholder="예: 8-10">
+                                        <span class="input-group-text">rep</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-success btn-lg">모든 설정 저장</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pull 루틴 설정 -->
+    <div class="tab-pane fade" id="pull" role="tabpanel" aria-labelledby="pull-tab">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="card-title mb-0">Pull 루틴 종목 설정</h3>
+                    
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#batchUpdateModal" data-routine="pull">
+                            <i class="fas fa-exchange-alt me-1"></i> 일괄 적용
+                        </button>
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetModal" data-routine="pull">
+                            <i class="fas fa-undo me-1"></i> 초기화
+                        </button>
+                    </div>
+                </div>
+                
+                <form action="/save-routine" method="post" id="pullForm">
+                    <input type="hidden" name="routine_type" value="pull">
+                    
+                    {% for exercise in routines.pull %}
+                    <div class="row mb-4 align-items-center">
+                        <div class="col-md-4">
+                            <h5>{{ exercise.name }}</h5>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">무게</span>
+                                        <input type="number" name="weight_{{ exercise.name }}" value="{{ exercise.weight }}" class="form-control" min="0" step="0.5">
+                                        <span class="input-group-text">kg</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text">세트</span>
+                                        <input type="number" name="sets_{{ exercise.name }}" value="{{ exercise.sets }}" class="form-control" min="1" max="10">
+                                        <span class="input-group-text">set</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-5">
+                                    <div class="input-group">
+                                        <span class="input-group-text">횟수</span>
+                                        <input type="text" name="reps_{{ exercise.name }}" value="{{ exercise.reps }}" class="form-control" placeholder="예: 8-10">
+                                        <span class="input-group-text">rep</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-success btn-lg">모든 설정 저장</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Leg 루틴 설정 -->
+    <div class="tab-pane fade" id="leg" role="tabpanel" aria-labelledby="leg-tab">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="card-title mb-0">Leg 루틴 종목 설정</h3>
+                    
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#batchUpdateModal" data-routine="leg">
+                            <i class="fas fa-exchange-alt me-1"></i> 일괄 적용
+                        </button>
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resetModal" data-routine="leg">
+                            <i class="fas fa-undo me-1"></i> 초기화
+                        </button>
+                    </div>
+                </div>
+                
+                <form action="/save-routine" method="post" id="legForm">
+                    <input type="hidden" name="routine_type" value="leg">
+                    
+                    {% for exercise in routines.leg %}
+                    <div class="row mb-4 align-items-center">
+                        <div class="col-md-4">
+                            <h5>{{ exercise.name }}</h5>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">무게</span>
+                                        <input type="number" name="weight_{{ exercise.name }}" value="{{ exercise.weight }}" class="form-control" min="0" step="0.5">
+                                        <span class="input-group-text">kg</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text">세트</span>
+                                        <input type="number" name="sets_{{ exercise.name }}" value="{{ exercise.sets }}" class="form-control" min="1" max="10">
+                                        <span class="input-group-text">set</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-5">
+                                    <div class="input-group">
+                                        <span class="input-group-text">횟수</span>
+                                        <input type="text" name="reps_{{ exercise.name }}" value="{{ exercise.reps }}" class="form-control" placeholder="예: 8-10">
+                                        <span class="input-group-text">rep</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-success btn-lg">모든 설정 저장</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 일괄 적용 모달 -->
+<div class="modal fade" id="batchUpdateModal" tabindex="-1" aria-labelledby="batchUpdateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="batchUpdateModalLabel">무게 일괄 적용</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/update-all-weights" method="post" id="batchUpdateForm">
+                <div class="modal-body">
+                    <input type="hidden" name="routine_type" id="batchRoutineType">
+                    
+                    <div class="mb-3">
+                        <label for="weight" class="form-label">모든 운동 무게 (kg)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="weight" name="weight" value="0" min="0" step="0.5">
+                            <span class="input-group-text">kg</span>
+                        </div>
+                        <div class="form-text">입력한 무게가 선택한.루틴의 모든 운동에 적용됩니다.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="submit" class="btn btn-primary">일괄 적용</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 초기화 모달 -->
+<div class="modal fade" id="resetModal" tabindex="-1" aria-labelledby="resetModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetModalLabel">초기화 옵션</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="resetRoutineType">
+                
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-warning" id="resetWeightsBtn">
+                        <i class="fas fa-weight-hanging me-2"></i>무게만 초기화 (0kg)
+                    </button>
+                    <button type="button" class="btn btn-danger" id="resetRoutineBtn">
+                        <i class="fas fa-redo-alt me-2"></i>세트 수와 반복 횟수 초기화 (기본값)
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 무게만 초기화 폼 (숨김) -->
+<form id="resetWeightsForm" action="/reset-weights" method="post" style="display: none;">
+    <input type="hidden" name="routine_type" id="resetWeightsRoutineType">
+</form>
+
+<!-- 루틴 초기화 폼 (숨김) -->
+<form id="resetRoutineForm" action="/reset-routine" method="post" style="display: none;">
+    <input type="hidden" name="routine_type" id="resetRoutineRoutineType">
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 모달 관련 처리
+    const batchUpdateModal = document.getElementById('batchUpdateModal');
+    const resetModal = document.getElementById('resetModal');
+    
+    // 일괄 적용 모달
+    batchUpdateModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const routineType = button.getAttribute('data-routine');
+        document.getElementById('batchRoutineType').value = routineType;
+        document.getElementById('batchUpdateModalLabel').textContent = `${routineType.charAt(0).toUpperCase() + routineType.slice(1)} 루틴 무게 일괄 적용`;
+    });
+    
+    // 초기화 모달
+    resetModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const routineType = button.getAttribute('data-routine');
+        document.getElementById('resetRoutineType').value = routineType;
+        document.getElementById('resetModalLabel').textContent = `${routineType.charAt(0).toUpperCase() + routineType.slice(1)} 루틴 초기화`;
+    });
+    
+    // 무게만 초기화 버튼
+    document.getElementById('resetWeightsBtn').addEventListener('click', function() {
+        if (confirm('정말로 모든 무게를 0kg으로 초기화하시겠습니까?')) {
+            const routineType = document.getElementById('resetRoutineType').value;
+            document.getElementById('resetWeightsRoutineType').value = routineType;
+            document.getElementById('resetWeightsForm').submit();
+        }
+    });
+    
+    // 루틴 초기화 버튼
+    document.getElementById('resetRoutineBtn').addEventListener('click', function() {
+        if (confirm('정말로 세트 수와 반복 횟수를 기본값으로 초기화하시겠습니까? (현재 무게는 유지됩니다)')) {
+            const routineType = document.getElementById('resetRoutineType').value;
+            document.getElementById('resetRoutineRoutineType').value = routineType;
+            document.getElementById('resetRoutineForm').submit();
+        }
+    });
+});
+</script>
 {% endblock %}
